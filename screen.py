@@ -24,6 +24,10 @@ class Screen:
                 if random.random() < settings.ACCENT_AMT:
                     self._back_board[i][j] = settings.BG_ACCENT_COLOR
 
+        for i in range(self._height - settings.GND_HEIGHT, self._height):
+            for j in range(self._width):
+                self._back_board[i][j] = settings.FG_COLOR
+
         for i in range(settings.FG_DEPTH):
             for j in range(self._width):
                 self._back_board[i][j] = settings.FG_COLOR
@@ -36,7 +40,7 @@ class Screen:
         clear the foreground
         '''
 
-        for i in range(settings.FG_DEPTH):
+        for i in range(self._height):
             for j in range(self._width):
                 self._back_board[i][j] = ' '
 
@@ -81,8 +85,9 @@ class Screen:
             return
 
     def print_board(self, frame_count):
+        print('board')
         print(self.CURSOR_START)
-
+    
         for i in range(self._height):
             for j in range(self._width):
                 print(self._back_board[i][(j + frame_count) % self._width] + self._fore_board[i][j], end='')

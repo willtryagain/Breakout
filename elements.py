@@ -18,7 +18,7 @@ class Brick(Meta):
             raise ValueError
         super().__init__(window_height, window_width, np.array([x, y], dtype='float32'), np.array([1, 1]))
 
-        self._rprsnttn = np.array([[Fore.YELLOW + Style.BRIGHT + '$']], dtype='object')
+        self._ascii = np.array([[Fore.YELLOW + Style.BRIGHT + '$']], dtype='object')
 
 class Ball(Meta):
     '''
@@ -38,7 +38,6 @@ class Ball(Meta):
         super().reset_a()
 
         self._a[0] += settings.GRAVITY_X * 0.1
-        self._a[1] += settings.GRAVITY_Y 
 
 
 
