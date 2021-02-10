@@ -7,4 +7,5 @@ import settings
 
 init()
 print('\033[2J') # clear screen
-Game.start()
+game = Game()
+game.play()

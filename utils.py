@@ -42,6 +42,8 @@ def get_design(path):
     except FileNotFoundError:
         return None
 
+    return np.array(arr, dtype='object')
+
 def make_brick_group(window_height, window_width, x=0, y=0, h=1, w=1):
     bricks = []
     for i in range(h):
