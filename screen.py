@@ -26,11 +26,11 @@ class Screen:
 
         for i in range(self._height - settings.GND_HEIGHT, self._height):
             for j in range(self._width):
-                self._back_board[i][j] = settings.FG_COLOR
+                self._back_board[i][j] = settings.GND_COLOR
 
         for i in range(settings.FG_DEPTH):
             for j in range(self._width):
-                self._back_board[i][j] = settings.FG_COLOR
+                self._back_board[i][j] = settings.SKY_DEPTH
 
         self._fore_board = np.array([[' ' for j in range(self._width)] for i in range(self._height)], dtype='object')
 
@@ -85,7 +85,6 @@ class Screen:
             return
 
     def print_board(self, frame_count):
-        print('board')
         print(self.CURSOR_START)
     
         for i in range(self._height):
@@ -127,6 +126,6 @@ class Screen:
             print(Style.BRIGHT + Fore.RED + 'YOU LOST!')
 
         print('\n\n', end='')
-
+        print(Fore.WHITE, end='')
         print(Style.DIM + '\nPress E to exit')
         print(Style.RESET_ALL)

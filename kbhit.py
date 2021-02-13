@@ -12,7 +12,7 @@ class KBHit:
             self._next_term = termios.tcgetattr(self._fd)
 
             self._next_term[3] = (self._next_term[3] & ~termios.ICANON 
-                                  & termios.ECHO)
+                                  & ~termios.ECHO)
 
             termios.tcsetattr(self._fd, termios.TCSAFLUSH, self._next_term)
 
