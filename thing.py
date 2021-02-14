@@ -38,8 +38,8 @@ class Thing:
         self._acc += acc
     
     def move(self):
-        self._vel += self._acc
-        self._pos += self._vel
+        self._vel = self._vel + self._acc
+        self._pos = self._pos + self._vel
 
         if self.is_aground():
             if self._vel[0] > 0:

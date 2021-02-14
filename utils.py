@@ -7,8 +7,8 @@ from time import monotonic as clock
 import random
 import math
 
-import settings
-import elements
+import config as conf
+import obstacle
 
 def intersect(a, b):
     '''
@@ -28,12 +28,12 @@ def intersect(a, b):
     
     return True, [x0, x1, y0, y1]
 
-def get_design(path):
+def get_art(path):
     '''
     read the template and return np array
     '''
     
-    path = os.path.join(settings.DESIGN_BASE_PATH, path)
+    path = os.path.join(conf.ART_BASE_PATH, path)
     arr = []
     try:
         with open(path, 'r') as f:
@@ -44,8 +44,8 @@ def get_design(path):
 
     return np.array(arr, dtype='object')
 
-def make_brick_group(window_height, window_width, x=0, y=0, h=1, w=1):
-    bricks = []
+def make_coin_group(game_height, game_width, x=0, y=0, h=1, w=1):
+    coins = []
     for i in range(h):
         draw = False
         for j in range(w):
@@ -53,19 +53,16 @@ def make_brick_group(window_height, window_width, x=0, y=0, h=1, w=1):
                 if random.random() < 0.65:
                     draw = True
             if draw:
-                bricks.append(elements.Brick(window_height, window_width, x+i, y+i))
+                coins.append(obstacle.Coin(game_height, game_width, x+i, y+j))
                 if random.random() < 0.3:
                     draw = False
                     break
-    return bricks
+    return coins
 
-def get_components(magnitude, start, end):
+def vector_decompose(magnitude, start, end):
     '''
     get 2D components of a vector
     '''
-
-    if type(start) != np.ndarray or type(end) != np.ndarray:
-        raise ValueError
     
     x = abs(start[0] - end[0])
     y = abs(start[1] - end[1])
@@ -89,7 +86,7 @@ def get_loading_bar(length, left, total):
         return Style.BRIGHT + Back.RED + (' ' * length) 
     if left <= 0:
         return Style.BRIGHT + Back.GREEN + (' ' * length) 
-    p = int(round(left / total) * length)
+    p = int(round((left / total) * length))
     s = Style.BRIGHT + Back.RED + (' ' * p) 
     s += Back.GREEN + (' ' * (length - p)) 
     return s
