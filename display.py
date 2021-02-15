@@ -22,10 +22,10 @@ class Display:
         )
        
 
-    def put(self, ball):
-        pos = ball.get_pos()
-        tail = ball.get_tail()
-        ascii = ball.get_ascii()
+    def put(self, item):
+        pos = item.get_pos()
+        tail = item.get_tail()
+        ascii = item.get_ascii()
        
         try:
             self._canvas[ pos[0]: tail[0] + 1, pos[1]: tail[1] + 1] = ascii
