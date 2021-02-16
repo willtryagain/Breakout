@@ -34,6 +34,8 @@ class Game:
         l = self._paddle._pos[1]
         r = self._paddle._pos[1] +  self._paddle._size[1] - 1
 
+
+        # self.handle_brick_collisions()
         # reflection from paddle
         if self._ball._pos[0] == self._height-2 \
             and l <= self._ball._pos[1] \
@@ -53,22 +55,41 @@ class Game:
             vx = self._ball._velocity.getvx()
             self._ball._velocity.setvx(-vx)
 
+    def handle_brick_collisions(self):
+        y0 = self._brick._pos[1]
+        x0 = self._brick._pos[0]
+        y1 = y0 + self._brick._pos[1] - 1
+        x1 = x0 + self._brick._pos[0] - 1
+
+
+        is_above = (self._brick._pos[0] == x0 - 1)
+        is_below = (self._brick._pos[0] == x1 + 1)
+        is_left = (self._brick._pos[1] - 1)
+        is_right = (self._brick._pos[1] + self._brick._size[1])
+        is_between_y = (y0 <= self._brick._pos[1] and self._brick._pos[1] <= y1)
+        is_between_x = (y0 <= self._brick._pos[1] and self._brick._pos[1] <= y1)
+        if (is_above or is_below) \
+            and is_between_y:
+            vx = self._ball._velocity.getvx()
+            self._ball._velocity.setvx(-vx)
+
+
     def handle_keys(self):
         if self._keyboard.kbhit():
+        
             key = self._keyboard.getch()
-
             if key == 'a' or key == 'd':
                 self._paddle.move(key)
             
+            elif key == ''
             self._keyboard.flush()
 
     def handle_death(self):
-        # self._ball._pos = [self._height-2, self._width//2 - 1]
-        # self._ball._velocity.setvx(1)
-        # self._ball._velocity.setvy(1)
-        # self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
-        # self._player.lose_life()
-        pass
+        self._ball._pos = [self._height-2, self._width//2 - 1]
+        self._ball._velocity.setvx(0)
+        self._ball._velocity.setvy(0)
+        self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
+        self._player.lose_life()
 
     def move_items(self):
         self._ball.move()
