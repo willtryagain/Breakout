@@ -49,25 +49,33 @@ class Game:
 
 
         if self.handle_brick_collisions():
+            print("brick")
             return
         # reflection from paddle
         if self._ball._pos[0] == self._height-2 \
             and l <= self._ball._pos[1] \
             and self._ball._pos[1] <= r:
+            mid = self._paddle._pos[1] + self._paddle._size[1] // 2
             vx = self._ball._velocity.getvx()
+            vy = self._ball._velocity.getvy()
             self._ball._velocity.setvx(-vx)
+            self._ball._velocity.setvy(abs(mid - self._ball._pos[1]) * max(1, vy))
+            print("paddle")
 
         # hits the surface
         elif self._ball._pos[0] == self._height-1:
             self.handle_death()
+            print("death")
 
         elif self._ball._pos[1] == 0 or self._ball._pos[1] == self._width-2:
             vy = self._ball._velocity.getvy()
             self._ball._velocity.setvy(-vy)
+            print("side walls")
 
         elif self._ball._pos[0] == 0:
             vx = self._ball._velocity.getvx()
             self._ball._velocity.setvx(-vx)
+            print("ceiling")
 
     def handle_brick_collisions(self):
 
@@ -110,21 +118,23 @@ class Game:
             elif key == ' ':
                 if self._paddle._pos[1] <= self._ball._pos[1] \
                     and self._ball._pos[1] <= self._paddle._pos[1] + self._paddle._size[1] - 1:
-                    self._ball._velocity.setvx(-1)
+                    self.restart()
 
             self._keyboard.flush()
 
     def restart(self):
         mid = self._paddle._pos[1] + self._paddle._size[1] // 2
-        vy = ()
+        vy = abs(mid - self._ball._pos[1])
+        self._ball._velocity.setvx(-1)
+        self._ball._velocity.setvy(vy)
 
 
     def handle_death(self):
         self._ball._pos = [self._height-2, self._width//2 - 1]
-        self._ball._velocity.setvx(0)
-        self._ball._velocity.setvy(0)
         self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
         self._player.lose_life()
+        self._ball._velocity.setvx(0)
+        self._ball._velocity.setvy(0)
 
     def move_items(self):
         self._ball.move()
@@ -136,7 +146,6 @@ class Game:
             self._display.put(brick)
 
     def mainloop(self):
-        
         while True:
             time = clock()
             self.handle_keys()
@@ -146,7 +155,7 @@ class Game:
             self._display.clrscr()
             self.add_items()
             self._display.show()
-
+            # print(self._display._canvas.shape)
             while clock() - time < 0.1:
                 pass
-
+            

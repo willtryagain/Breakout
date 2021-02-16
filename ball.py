@@ -10,8 +10,9 @@ class Ball(Meta):
             Back.BLUE + Style.BRIGHT + '(', 
             Back.BLUE + Style.BRIGHT + ')'],
             dtype='object'
-        ).reshape(1, 2)
+        ).reshape(1, -1)
         self._velocity = Velocity(-1, -1) # composition
+        self._cache = None
         super().__init__(game_height, game_width, [game_height-2,\
              game_width//2 - 3], self._ascii.shape, self._ascii)
 
