@@ -6,7 +6,7 @@ from meta import Meta
 
 class Paddle(Meta):
     def __init__(self, game_height, game_width, len=20):
-        ascii = [Fore.RED + '('] + [Fore.WHITE + '=']*len + [Fore.RED + ')']
+        ascii = [Fore.WHITE + '('] + [Back.YELLOW + ' ']*len + [Fore.WHITE + ')']
         self._ascii = np.array(
             ascii,
             dtype='object'
@@ -30,7 +30,7 @@ class Paddle(Meta):
         elif key == 'd':
             self._pos[1] += 3
             if self.at_right_end():
-                self._pos[1] = self._gw - self._size[1] - 1
+                self._pos[1] = self._gw - self._size[1]
         else:
             raise KeyError('paddle')
        

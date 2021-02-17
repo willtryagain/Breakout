@@ -16,4 +16,5 @@ class Player:
         print('\033[0K', end='') # EOL
         print('SCORE:', str(self._score).rjust(1), end='\t')
         print('LIVES:', str(self._lives).rjust(3), end='\t')
-        print('TIME:', str(self._start).rjust(5), end='\t')
+        time_passed = int(clock() - self._start)
+        print('TIME:', str(time_passed).rjust(5), end='\t')

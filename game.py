@@ -18,8 +18,11 @@ class Game:
         r, c = os.popen('stty size', 'r').read().split()
         self._height = int(r) - 10
         self._width = int(c) - 10
-        self._ball = Ball(self._height, self._width)
         self._paddle = Paddle(self._height, self._width)
+        self._ball = Ball(self._height, self._width, [
+            self._height - 2, 
+            (self._paddle._pos[1] + self._paddle._size[1]) // 2
+        ])
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
         self._powerup = Powerup(self._height, self._width, [0, 0])

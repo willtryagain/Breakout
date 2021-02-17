@@ -5,7 +5,7 @@ from meta import Meta
 from velocity import Velocity
 
 class Ball(Meta):
-    def __init__(self, game_height, game_width):
+    def __init__(self, game_height, game_width, pos):
         self._ascii = np.array([
             Style.BRIGHT + Fore.RED + '(', 
             Style.BRIGHT + Fore.RED + ')'],
@@ -14,8 +14,7 @@ class Ball(Meta):
         self._alive = True
         self._velocity = Velocity(-1, -1) # composition
         self._cache = None
-        super().__init__(game_height, game_width, [game_height-2,\
-             game_width//2 - 3], self._ascii.shape, self._ascii)
+        super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
     #     return [x0 + self._size[0] - 1, y0 + self._size[1] - 1]
 
