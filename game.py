@@ -155,7 +155,8 @@ class Game:
             
             elif key == ' ':
                 if self._paddle._pos[1] <= self._ball._pos[1] \
-                    and self._ball._pos[1] <= self._paddle._pos[1] + self._paddle._size[1] - 1:
+                    and self._ball._pos[1] <= self._paddle._pos[1] + self._paddle._size[1] - 1 \
+                    and not self._ball._alive:
                     self.restart()
 
             self._keyboard.flush()

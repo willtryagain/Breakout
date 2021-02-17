@@ -15,6 +15,8 @@ class Display:
             ], dtype='object'
         )
 
+    
+
         self._canvas = np.array([
             [' ' for j in range(self._width)] 
             for i in range(self._height)

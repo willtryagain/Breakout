@@ -7,8 +7,8 @@ from velocity import Velocity
 class Ball(Meta):
     def __init__(self, game_height, game_width):
         self._ascii = np.array([
-            Back.BLUE + Style.BRIGHT + '(', 
-            Back.BLUE + Style.BRIGHT + ')'],
+            Style.BRIGHT + Fore.RED + '(', 
+            Style.BRIGHT + Fore.RED + ')'],
             dtype='object'
         ).reshape(1, -1)
         self._alive = True
