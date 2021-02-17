@@ -21,11 +21,11 @@ class Game:
         self._paddle = Paddle(self._height, self._width)
         self._ball = Ball(self._height, self._width, [
             self._height - 2, 
-            (self._paddle._pos[1] + self._paddle._size[1]) // 2
+            (2*self._paddle._pos[1] + self._paddle._size[1]) // 2
         ])
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
-        self._bricks = self.arrange_bricks(1, 1)
+        self._bricks = self.arrange_bricks(3, 3)
         self._powerups = self.get_powerups()
         self._player = Player()
 
@@ -45,8 +45,9 @@ class Game:
         w = 5
         for i in range(rows):
             for j in range(cols):
-                brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
-                bricks.append(brick)
+                if i == j or i + j == cols - 1:
+                    brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
+                    bricks.append(brick)
         
         
         return bricks
@@ -174,7 +175,11 @@ class Game:
         
             key = self._keyboard.getch()
             if key == 'a' or key == 'd':
-                self._paddle.move(key)
+
+                if self._ball._alive:
+                    self._paddle.move(key)
+                else:
+                    self._paddle.move(key, self._ball)
             
             elif key == ' ':
                 if self._paddle._pos[1] <= self._ball._pos[1] \
@@ -207,7 +212,8 @@ class Game:
         self._display.put(self._ball)
         self._display.put(self._paddle)
         for brick in self._bricks:
-            self._display.put(brick)
+            if brick._strength:
+                self._display.put(brick)
         for powerup in self._powerups:
             if powerup._state == 'ACTIVE':
                 self._display.put(powerup)

@@ -22,7 +22,7 @@ class Paddle(Meta):
     def at_right_end(self):
         return self._pos[1] + self._size[1] >= self._gw 
 
-    def move(self, key):   
+    def move(self, key, ball=None):   
         if key == 'a':
             self._pos[1] -= 3
             if self.at_left_end():
@@ -34,4 +34,6 @@ class Paddle(Meta):
         else:
             raise KeyError('paddle')
        
+        if ball is not None:
+            ball._pos[1] = (2*self._pos[1] + self._size[1]) // 2
 

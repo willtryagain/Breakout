@@ -11,8 +11,8 @@ class Ball(Meta):
             Style.BRIGHT + Fore.RED + ')'],
             dtype='object'
         ).reshape(1, -1)
-        self._alive = True
-        self._velocity = Velocity(-1, -1) # composition
+        self._alive = False
+        self._velocity = Velocity(0, 0) # composition
         self._cache = None
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
