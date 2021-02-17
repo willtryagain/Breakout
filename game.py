@@ -25,9 +25,17 @@ class Game:
         ])
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
-        self._powerup = Powerup(self._height, self._width, [0, 0])
         self._bricks = self.arrange_bricks(1, 1)
+        self._powerups = self.get_powerups()
         self._player = Player()
+
+    def get_powerups(self):
+        powerups = []
+        for brick in self._bricks:
+            powerup = Powerup(self._height, self._width, brick._pos)
+            powerups.append(powerup)
+
+        return powerups    
 
     def arrange_bricks(self, rows, cols):
         bricks = []
@@ -39,8 +47,7 @@ class Game:
             for j in range(cols):
                 brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
                 bricks.append(brick)
-                if i == 0 and j == 0:
-                    self._powerup = Powerup(self._height, self._width, [x0 + i*h, y0 + j*w])
+        
         
         return bricks
 
@@ -137,6 +144,10 @@ class Game:
            
         return hit
 
+    def remove(self):
+        self.remove_bricks()
+        self.remove_powerups()
+
     def remove_bricks(self):
         indices = []
         for index, brick in enumerate(self._bricks):
@@ -145,9 +156,18 @@ class Game:
 
         indices.sort(reverse=True)
         for index in indices:
-            if self._bricks[index]._pos == self._powerup._pos:
-                self._powerup._active = True
+            self._powerups[index]._state = 'ACTIVE'
             del self._bricks[index]
+
+    def remove_powerups(self):
+        indices = []
+        for index, powerup in enumerate(self._powerups):
+            if powerup._state == 'DELETE':
+                indices.append(index)
+
+        indices.sort(reverse=True)
+        for index in indices:
+            del self._powerups[index]
 
     def handle_keys(self):
         if self._keyboard.kbhit():
@@ -178,8 +198,9 @@ class Game:
 
     def move_items(self):
         self._ball.move()
-        if self._powerup._active:
-            self._powerup.move()
+        for powerup in self._powerups:
+            if powerup._state == 'ACTIVE':
+                powerup.move()
         
     def add_items(self):
 
@@ -187,8 +208,9 @@ class Game:
         self._display.put(self._paddle)
         for brick in self._bricks:
             self._display.put(brick)
-        if self._powerup._active:
-            self._display.put(self._powerup)
+        for powerup in self._powerups:
+            if powerup._state == 'ACTIVE':
+                self._display.put(powerup)
 
     def mainloop(self):
         while True:
@@ -196,7 +218,7 @@ class Game:
             self.handle_keys()
             self.move_items()
             self.handle_ball_collisions()
-            self.remove_bricks()
+            self.remove()
             # print(self._ball._velocity.getvx(), self._ball._velocity.getvy())
             self._display.clrscr()
             self.add_items()

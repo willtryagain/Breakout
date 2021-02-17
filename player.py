@@ -9,7 +9,6 @@ class Player:
 
     def lose_life(self):
         self._lives -= 1
-        print(self._lives)
 
     def display_stats(self):
         print(Style.RESET_ALL + Style.BRIGHT, end='')
