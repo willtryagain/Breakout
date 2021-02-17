@@ -18,7 +18,14 @@ class Ball(Meta):
 
     #     return [x0 + self._size[0] - 1, y0 + self._size[1] - 1]
 
-    def move(self):
+    def move(self, key=None):
+        if key is not None:
+            if key == 'w':
+                self._pos[1] += 1
+            elif key == 's':
+                self._pos[1] -= 1
+            return
+
         self._pos[0] += self._velocity.vx
         self._pos[1] += self._velocity.vy
         

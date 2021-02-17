@@ -15,10 +15,18 @@ class Powerup(Meta):
         self._velocity = Velocity(1)
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
-    def move(self):
+    def move(self, paddle=None):
+
         vx = self._velocity.getvx()
-        if self._pos[0] + self._size[0] - 1 + vx  <= self._gh - 2:
+        if self._pos[0] + vx <= self._gh - 1:
             self._pos[0] +=  vx
         else:
             self._state = 'DELETE'
+ 
     
+    def handle_collision(self, paddle):
+        l = paddle._pos[1]
+        r = paddle._pos[1] + paddle._size[1] - 1
+        if self._pos[0] == self._gh - 2:
+            if l <= self._pos[1] and self._pos[1] + self._size[1] <= r:
+                paddle.update(2)

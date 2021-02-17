@@ -145,6 +145,8 @@ class Game:
            
         return hit
 
+        
+
     def remove(self):
         self.remove_bricks()
         self.remove_powerups()
@@ -174,6 +176,7 @@ class Game:
         if self._keyboard.kbhit():
         
             key = self._keyboard.getch()
+            print('pressed:' + key)
             if key == 'a' or key == 'd':
 
                 if self._ball._alive:
@@ -181,6 +184,9 @@ class Game:
                 else:
                     self._paddle.move(key, self._ball)
             
+            elif key == 'w' or key == 's':
+                if not self._ball._alive:
+                    self._ball.move(key)
             elif key == ' ':
                 if self._paddle._pos[1] <= self._ball._pos[1] \
                     and self._ball._pos[1] <= self._paddle._pos[1] + self._paddle._size[1] - 1 \
@@ -224,6 +230,9 @@ class Game:
             self.handle_keys()
             self.move_items()
             self.handle_ball_collisions()
+            for powerup in self._powerups:
+                if powerup._state == 'ACTIVE':
+                    powerup.handle_collision(self._paddle)
             self.remove()
             # print(self._ball._velocity.getvx(), self._ball._velocity.getvy())
             self._display.clrscr()
