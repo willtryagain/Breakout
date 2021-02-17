@@ -11,6 +11,7 @@ class Ball(Meta):
             Back.BLUE + Style.BRIGHT + ')'],
             dtype='object'
         ).reshape(1, -1)
+        self._alive = True
         self._velocity = Velocity(-1, -1) # composition
         self._cache = None
         super().__init__(game_height, game_width, [game_height-2,\
@@ -22,6 +23,14 @@ class Ball(Meta):
         self._pos[0] += self._velocity.vx
         self._pos[1] += self._velocity.vy
         
+        # non-negative
+        self._pos[0] = max(self._pos[0], 0)
+        self._pos[1] = max(self._pos[1], 0)
+        
+        # upper bound
+        self._pos[0] = min(self._pos[0], self._gh - self._size[0])
+        self._pos[1] = min(self._pos[1], self._gw - self._size[1])
+
 
     def lost(self):
         # left, right, top, bottom

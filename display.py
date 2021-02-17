@@ -22,11 +22,13 @@ class Display:
         )
        
 
-    def put(self, item):
+    def put(self, item, type='other'):
         pos = item.get_pos()
         tail = item.get_tail()
         ascii = item.get_ascii()
-       
+        # if type != 'other':
+        #     print(pos, tail)
+        #     print(ascii)
         try:
             self._canvas[ pos[0]: tail[0] + 1, pos[1]: tail[1] + 1] = ascii
             # for i in range(pos[0], tail[0] + 1):

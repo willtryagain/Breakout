@@ -21,5 +21,3 @@ class Meta:
 
     def get_ascii(self):
         return self._ascii
-
-  

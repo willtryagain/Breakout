@@ -20,7 +20,7 @@ class Paddle(Meta):
         return self._pos[1] <= 0
     
     def at_right_end(self):
-        return self._pos[1] + self._size[1] - 1 >= self._gw 
+        return self._pos[1] + self._size[1] >= self._gw 
 
     def move(self, key):   
         if key == 'a':

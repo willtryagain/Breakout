@@ -5,7 +5,8 @@ from meta import Meta
 
 class Brick(Meta):
 
-    def __init__(self, game_height, game_width, pos):
+    def __init__(self, game_height, game_width, pos, strength=3):
+
         self._ascii = np.array([
             Back.RED + ' ',
             Back.RED + ' ',
@@ -13,4 +14,17 @@ class Brick(Meta):
             Back.RED + ' ',
             Back.RED + ' ',
         ], dtype='object').reshape(1, -1)
+        self._strength = strength
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
+
+    def decrease_strength(self):
+        self._strength -= 1
+        if self._strength == 2:
+            self.draw_brick(Back.GREEN)
+        elif self._strength == 1:
+            self.draw_brick(Back.MAGENTA)
+        else:
+            self.draw_brick('')
+
+    def draw_brick(self, color):
+        self._ascii = [color + ' '] * 5
