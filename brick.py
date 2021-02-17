@@ -23,8 +23,8 @@ class Brick(Meta):
             self.draw_brick(Back.GREEN)
         elif self._strength == 1:
             self.draw_brick(Back.MAGENTA)
-        else:
-            self.draw_brick('')
+        elif self._strength == 0:
+            self.draw_brick(Back.BLUE)
 
     def draw_brick(self, color):
         self._ascii = [color + ' '] * 5

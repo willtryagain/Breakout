@@ -1,13 +1,16 @@
 import os
 from time import monotonic as clock, sleep
+from random import random
 
 from ball import Ball
 from paddle import Paddle
 from brick import Brick
 from player import Player
+from powerup import Powerup
 from kbhit import KBHit
 from display import Display
 from velocity import Velocity
+
 
 class Game:
     
@@ -19,7 +22,8 @@ class Game:
         self._paddle = Paddle(self._height, self._width)
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
-        self._bricks = self.arrange_bricks(3, 3)
+        self._powerup = Powerup(self._height, self._width, [0, 0])
+        self._bricks = self.arrange_bricks(1, 1)
         self._player = Player()
 
     def arrange_bricks(self, rows, cols):
@@ -32,6 +36,8 @@ class Game:
             for j in range(cols):
                 brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
                 bricks.append(brick)
+                if i == 0 and j == 0:
+                    self._powerup = Powerup(self._height, self._width, [x0 + i*h, y0 + j*w])
         
         return bricks
 
@@ -136,6 +142,8 @@ class Game:
 
         indices.sort(reverse=True)
         for index in indices:
+            if self._bricks[index]._pos == self._powerup._pos:
+                self._powerup._active = True
             del self._bricks[index]
 
     def handle_keys(self):
@@ -166,13 +174,17 @@ class Game:
 
     def move_items(self):
         self._ball.move()
+        if self._powerup._active:
+            self._powerup.move()
         
     def add_items(self):
 
-        self._display.put(self._ball, 'b')
+        self._display.put(self._ball)
         self._display.put(self._paddle)
         for brick in self._bricks:
             self._display.put(brick)
+        if self._powerup._active:
+            self._display.put(self._powerup)
 
     def mainloop(self):
         while True:
@@ -186,7 +198,6 @@ class Game:
             self.add_items()
             self._display.show()
             self._player.display_stats()
-            # print(self._display._canvas.shape)
             while clock() - time < 0.1:
                 pass
             
