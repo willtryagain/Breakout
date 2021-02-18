@@ -30,4 +30,4 @@ class Powerup(Meta):
         if self._pos[0] == self._gh - 2:
             if l <= self._pos[1] and self._pos[1] + self._size[1] <= r:
                 self._state = 'IN_USE'
-                paddle.update(2)
+                paddle.update(-2)

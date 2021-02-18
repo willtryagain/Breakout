@@ -7,6 +7,7 @@ from paddle import Paddle
 from brick import Brick
 from player import Player
 from powerup import Powerup
+from fastball import Fastball
 from kbhit import KBHit
 from display import Display
 from velocity import Velocity
@@ -32,7 +33,7 @@ class Game:
     def get_powerups(self):
         powerups = []
         for brick in self._bricks:
-            powerup = Powerup(self._height, self._width, brick._pos, clock())
+            powerup = Fastball(self._height, self._width, brick._pos, clock())
             powerups.append(powerup)
 
         return powerups    
@@ -239,9 +240,9 @@ class Game:
             self.handle_ball_collisions()
             for powerup in self._powerups:
                 if powerup._state == 'ACTIVE':
-                    powerup.handle_collision(self._paddle)
+                    powerup.handle_collision(self._paddle, self._ball)
                 elif powerup._state == 'IN_USE':
-                    if clock() - powerup._start_time >= 10:
+                    if clock() - powerup._start_time >= 40:
                         powerup._state == 'DELETE'
                         self._paddle.update(reset=True)
             self.remove()
@@ -250,6 +251,7 @@ class Game:
             self.add_items()
             self._display.show()
             self._player.display_stats()
+            print(self._paddle._size[1])
             while clock() - time < 0.1:
                 pass
             
