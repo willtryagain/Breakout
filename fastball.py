@@ -2,7 +2,7 @@ from powerup import Powerup
 import numpy as np
 from colorama import Fore, Back, Style
 
-def inc_mag(x, bias=5):
+def inc_mag(x, bias=2):
     sign = x // abs(x)
     mag = abs(x)
     return sign * (mag + bias)

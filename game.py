@@ -4,6 +4,7 @@ from random import random
 
 from ball import Ball
 from paddle import Paddle
+from colorama import Fore, Back, Style
 from brick import Brick
 from player import Player
 from powerup import Powerup
@@ -50,7 +51,10 @@ class Game:
                     brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
                     bricks.append(brick)
         
-        
+        brick = Brick(self._height, self._width, pos=[x0 + rows*h, y0 + cols*w])
+        brick.draw_brick(Back.CYAN)
+        brick._strength = 'INFINITY'
+        bricks.append(brick)
         return bricks
 
     def handle_paddle_collisions(self):

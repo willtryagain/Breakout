@@ -18,6 +18,8 @@ class Brick(Meta):
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
     def decrease_strength(self):
+        if self._strength == 'INFINITY':
+            return
         self._strength -= 1
         if self._strength == 2:
             self.draw_brick(Back.GREEN)
