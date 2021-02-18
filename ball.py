@@ -12,6 +12,7 @@ class Ball(Meta):
             dtype='object'
         ).reshape(1, -1)
         self._alive = False
+        self._thru = False
         self._velocity = Velocity(0, 0) # composition
         self._cache = None
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)

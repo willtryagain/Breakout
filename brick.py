@@ -17,8 +17,10 @@ class Brick(Meta):
         self._strength = strength
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
-    def decrease_strength(self):
+    def decrease_strength(self, ball=None):
         if self._strength == 'INFINITY':
+            if ball._thru:
+                self._strength = 0
             return
         self._strength -= 1
         if self._strength == 2:

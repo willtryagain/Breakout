@@ -9,6 +9,8 @@ from brick import Brick
 from player import Player
 from powerup import Powerup
 from fastball import Fastball
+from thruball import Thruball
+
 from kbhit import KBHit
 from display import Display
 from velocity import Velocity
@@ -34,7 +36,7 @@ class Game:
     def get_powerups(self):
         powerups = []
         for brick in self._bricks:
-            powerup = Fastball(self._height, self._width, brick._pos, clock())
+            powerup = Thruball(self._height, self._width, brick._pos, clock())
             powerups.append(powerup)
 
         return powerups    
@@ -138,14 +140,14 @@ class Game:
                 and is_between_y:
                 vx = self._ball._velocity.getvx()
                 self._ball._velocity.setvx(-vx)
-                brick.decrease_strength()
+                brick.decrease_strength(self._ball)
                 hit = True
             
             elif (is_left or is_right) \
                 and is_between_x:
                 vy = self._ball._velocity.getvy()
                 self._ball._velocity.setvy(-vy)
-                brick.decrease_strength()
+                brick.decrease_strength(self._ball)
                 hit = True
            
         return hit
