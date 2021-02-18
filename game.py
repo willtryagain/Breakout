@@ -13,11 +13,11 @@ from velocity import Velocity
 
 
 class Game:
-    
     def __init__(self):
         r, c = os.popen('stty size', 'r').read().split()
         self._height = int(r) - 10
         self._width = int(c) - 10
+        self.PAUSED = False
         self._paddle = Paddle(self._height, self._width)
         self._ball = Ball(self._height, self._width, [
             self._height - 2, 
@@ -32,7 +32,7 @@ class Game:
     def get_powerups(self):
         powerups = []
         for brick in self._bricks:
-            powerup = Powerup(self._height, self._width, brick._pos)
+            powerup = Powerup(self._height, self._width, brick._pos, clock())
             powerups.append(powerup)
 
         return powerups    
@@ -176,7 +176,9 @@ class Game:
         if self._keyboard.kbhit():
         
             key = self._keyboard.getch()
-            print('pressed:' + key)
+
+            if key == 'p':
+                self.PAUSED = not self.PAUSED
             if key == 'a' or key == 'd':
 
                 if self._ball._alive:
@@ -228,11 +230,20 @@ class Game:
         while True:
             time = clock()
             self.handle_keys()
+
+            if self.PAUSED:
+                while clock() - time < 0.1:
+                    pass
+                continue
             self.move_items()
             self.handle_ball_collisions()
             for powerup in self._powerups:
                 if powerup._state == 'ACTIVE':
                     powerup.handle_collision(self._paddle)
+                elif powerup._state == 'IN_USE':
+                    if clock() - powerup._start_time >= 10:
+                        powerup._state == 'DELETE'
+                        self._paddle.update(reset=True)
             self.remove()
             # print(self._ball._velocity.getvx(), self._ball._velocity.getvy())
             self._display.clrscr()

@@ -5,7 +5,7 @@ from meta import Meta
 from velocity import Velocity
 
 class Powerup(Meta):
-    def __init__(self, game_height, game_width,  pos, start_time=0):
+    def __init__(self, game_height, game_width,  pos, start_time):
         self._state = 'INACTIVE'
         self._ascii = np.array(
             [Back.MAGENTA + '<', 
@@ -29,4 +29,5 @@ class Powerup(Meta):
         r = paddle._pos[1] + paddle._size[1] - 1
         if self._pos[0] == self._gh - 2:
             if l <= self._pos[1] and self._pos[1] + self._size[1] <= r:
+                self._state = 'IN_USE'
                 paddle.update(2)

@@ -8,8 +8,9 @@ class Paddle(Meta):
     def __init__(self, game_height, game_width, len=20):
         self._ascii = self.draw()
         self._velocity = Velocity(0, 0, 0, 0)
+        self
         super().__init__(game_height, game_width, [game_height-1,\
-            game_width//2 - self._ascii.shape[1]], [len(self._ascii), len(self._ascii)], self._ascii)
+            game_width//2 - self._ascii.shape[1]], [1, 22], self._ascii)
 
 
     def at_left_end(self):
@@ -42,7 +43,10 @@ class Paddle(Meta):
             dtype='object'
         ).reshape(1, -1)
 
-    def update(self, value):
+    def update(self, value=0, reset=False):
+        
         len = self._size[1] - 2 + value
+        if reset:
+            len = 20
         self._ascii = self.draw(len)
         self._size[1] = len + 2
