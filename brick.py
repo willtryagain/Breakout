@@ -22,13 +22,17 @@ class Brick(Meta):
             if ball._thru:
                 self._strength = 0
             return
+        
         self._strength -= 1
-        if self._strength == 2:
-            self.draw_brick(Back.GREEN)
-        elif self._strength == 1:
-            self.draw_brick(Back.MAGENTA)
-        elif self._strength == 0:
-            self.draw_brick(Back.BLUE)
 
-    def draw_brick(self, color):
-        self._ascii = [color + ' '] * 5
+        if self._strength == 2:
+            self.draw(Back.GREEN)
+
+        elif self._strength == 1:
+            self.draw(Back.MAGENTA)
+
+        elif self._strength == 0:
+            self.draw(Back.BLUE)
+
+    def draw(self, color, len=5):
+        self._ascii = [color + ' '] * len

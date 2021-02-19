@@ -12,6 +12,7 @@ class Thruball(Powerup):
 
     def apply(self, ball):
         ball._thru = True
+        
 
     def handle_collision(self, paddle, ball):
         l = paddle._pos[1]

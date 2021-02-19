@@ -3,15 +3,14 @@ from colorama import Fore, Back, Style
 
 from velocity import Velocity 
 from meta import Meta
+import settings
 
 class Paddle(Meta):
     def __init__(self, game_height, game_width, len=20):
         self._ascii = self.draw()
-        self._velocity = Velocity(0, 0, 0, 0)
-        self
+        self._velocity = Velocity(0, 0)
         super().__init__(game_height, game_width, [game_height-1,\
             game_width//2 - self._ascii.shape[1]], [1, 22], self._ascii)
-
 
     def at_left_end(self):
         return self._pos[1] <= 0
@@ -21,24 +20,26 @@ class Paddle(Meta):
 
     def move(self, key, ball=None):   
         if key == 'a':
-            self._pos[1] -= 3
+            # move left
+            self._pos[1] -= settings.PADDLE_SPEED
             if self.at_left_end():
+                # lower bound
                 self._pos[1] = 0
         elif key == 'd':
-            self._pos[1] += 3
+            # move right
+            self._pos[1] += settings.PADDLE_SPEED
             if self.at_right_end():
+                # upper bound
                 self._pos[1] = self._gw - self._size[1]
-        else:
-            raise KeyError('paddle')
        
         if ball is not None:
             ball._pos[1] = (2*self._pos[1] + self._size[1]) // 2
 
-    def draw(self, len=20):
+    def draw(self, len=20, color=Back.YELLOW):
 
         return np.array(
             [Fore.WHITE + '('] 
-            + [Back.YELLOW + ' ']*len 
+            + [color + ' ']*len 
             + [Fore.WHITE + ')'],
             dtype='object'
         ).reshape(1, -1)

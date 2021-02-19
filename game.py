@@ -1,16 +1,17 @@
 import os
 from time import monotonic as clock, sleep
+from colorama import Fore, Back, Style
 from random import random
 
+import settings
 from ball import Ball
 from paddle import Paddle
-from colorama import Fore, Back, Style
 from brick import Brick
 from player import Player
 from powerup import Powerup
 from fastball import Fastball
 from thruball import Thruball
-
+from ballmulti import Ballmulti
 from kbhit import KBHit
 from display import Display
 from velocity import Velocity
@@ -19,8 +20,8 @@ from velocity import Velocity
 class Game:
     def __init__(self):
         r, c = os.popen('stty size', 'r').read().split()
-        self._height = int(r) - 10
-        self._width = int(c) - 10
+        self._height = int(r) - settings.BOTTOM_MARGIN
+        self._width = int(c) - settings.RIGHT_MARGIN
         self.PAUSED = False
         self._paddle = Paddle(self._height, self._width)
         self._balls = [Ball(self._height, self._width, [
@@ -29,34 +30,45 @@ class Game:
         ])]
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
-        self._bricks = self.arrange_bricks(3, 3)
+        self._bricks = self.arrange_bricks(3)
         self._powerups = self.get_powerups()
         self._player = Player()
 
     def get_powerups(self):
         powerups = []
         for brick in self._bricks:
-            powerup = Thruball(self._height, self._width, brick._pos, clock())
+            powerup = Ballmulti(self._height, self._width, brick._pos, clock())
             powerups.append(powerup)
 
         return powerups    
 
-    def arrange_bricks(self, rows, cols):
+    def arrange_bricks(self, k):
         bricks = []
         x0 = 2
-        y0 = 2
+        y0 = self._width // 2
         h = 1
         w = 5
-        for i in range(rows):
-            for j in range(cols):
-                if i == j or i + j == cols - 1:
-                    brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
-                    bricks.append(brick)
-        
-        brick = Brick(self._height, self._width, pos=[x0 + rows*h, y0 + cols*w])
-        brick.draw_brick(Back.CYAN)
-        brick._strength = 'INFINITY'
-        bricks.append(brick)
+        level = y0//8
+
+        for i in range(level):
+            for j in range(-i, i+1):
+                brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
+                bricks.append(brick)
+
+        for j in range(-level-3, level+3 + 1):
+            brick = Brick(self._height, self._width, pos=[x0 + level*h, y0 + j*w])
+            bricks.append(brick)
+
+        for i in range(level-1, -1, -1):
+            for j in range(-i, i+1):
+                brick = Brick(self._height, self._width, pos=[x0 + (level +  level - i)*h, y0 + j*w])
+                bricks.append(brick)
+
+        # for i in range(k):
+        #     for j in range(-level, level+1):
+        #         brick = Brick(self._height, self._width, pos=[x0 + (i+k+1)*h, y0 + j*w])
+        #         bricks.append(brick)
+        #     level -= 1
         return bricks
 
     def handle_paddle_collisions(self):
@@ -174,6 +186,7 @@ class Game:
             self._powerups[index]._state = 'ACTIVE'
             del self._bricks[index]
 
+
     def remove_powerups(self):
         indices = []
         for index, powerup in enumerate(self._powerups):
@@ -188,7 +201,6 @@ class Game:
         if self._keyboard.kbhit():
         
             key = self._keyboard.getch()
-            print(key)
 
             if key == 'p':
                 self.PAUSED = not self.PAUSED
@@ -203,7 +215,6 @@ class Game:
                 for i in range(len(self._balls)):
                     if not self._balls[i]._alive:
                         self._balls[i].move(key)
-                        print(self._balls[i]._pos[1])
             elif key == ' ':
                 for i in range(len(self._balls)):
                     if self._paddle._pos[1] <= self._balls[i]._pos[1] \
@@ -228,11 +239,16 @@ class Game:
             self._balls[i]._velocity.setvy(0)
 
     def move_items(self):
-        for i in range(len(self._balls)):
-            self._balls[i].move()
-            for powerup in self._powerups:
-                if powerup._state == 'ACTIVE':
-                    powerup.move()
+        balls = []
+        for ball in self._balls:
+            balls.append(ball)
+        self._balls = []
+        for ball in balls:
+            ball.move()
+            self._balls.append(ball)
+        for powerup in self._powerups:
+            if powerup._state == 'ACTIVE':
+                powerup.move()
         
     def add_items(self):
         for i in range(len(self._balls)):
@@ -249,7 +265,7 @@ class Game:
         while True:
             time = clock()
             self.handle_keys()
-
+            print(self._width)
             if self.PAUSED:
                 while clock() - time < 0.1:
                     pass
@@ -258,15 +274,18 @@ class Game:
             self.handle_ball_collisions()
             for powerup in self._powerups:
                 if powerup._state == 'ACTIVE':
-                    for i in range(len(self._balls)):
-                        powerup.handle_collision(self._paddle, self._balls[i])
+                    balls = powerup.handle_collision(self._paddle, self._balls)
+                    if balls is not None:
+                        self._balls = balls
+                    
                 elif powerup._state == 'IN_USE':
                     if clock() - powerup._start_time >= 40:
                         powerup._state == 'DELETE'
                         self._paddle.update(reset=True)
+
+    
             self.remove()
-            for i in range(len(self._balls)):
-                print(self._balls[i]._alive)
+
             self._display.clrscr()
             self.add_items()
             self._display.show()

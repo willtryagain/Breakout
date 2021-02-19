@@ -10,7 +10,10 @@ def inc_mag(x, bias=2):
 class Fastball(Powerup):
     def __init__(self, game_height, game_width, pos, start_time):
         super().__init__(game_height, game_width, pos, start_time)
-        self._ascii = np.array(
+        self._ascii = self.draw()
+        
+    def draw(self, color=Back.MAGENTA):
+        return np.array(
             [Back.MAGENTA + '(', 
             Back.MAGENTA + ')'], 
             dtype='object').reshape(1, -1)
