@@ -38,3 +38,6 @@ class Ball(Meta):
             Style.BRIGHT + Fore.RED + ')'],
             dtype='object'
         ).reshape(1, -1)
+
+    def reverse_vy(self):
+        
