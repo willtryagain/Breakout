@@ -72,7 +72,7 @@ class Game:
 
         return bricks
 
-    def ball_paddle_collide(self, ball):
+    def ball_paddle_collide_handle(self, ball):
 
         # middle position of paddle
         mid = (2*self._paddle._pos[1] + self._paddle._size[1] - 1) // 2
@@ -100,6 +100,25 @@ class Game:
         for i in range(len(self._balls)):
             self._balls[i] = self.ball_paddle_collide(self._balls[i])
 
+    def ball_paddle_collide(self, ball):
+        """
+        check if ball collided with the paddle 
+        """
+        left_paddle = self._paddle._pos[1]
+        right_paddle = self._paddle._pos[1] +  self._paddle._size[1] - 1
+        height_paddle = self._paddle._pos[0]
+
+        height_ball = ball._pos[0]
+        left_ball = ball._pos[1]
+        right_ball = ball._pos[1] + ball._size[1]
+
+        # ball is just above paddle
+        if height_ball == height_paddle - 1:
+            if left_paddle <= left_ball and right_ball <= right_paddle:
+                return True
+        
+        return False
+
     def ball_side_walls_collide(self, ball):
         """
         check if ball collided with the side walls 
@@ -115,24 +134,28 @@ class Game:
             return True
         
         return False
-    def ball_wall_collide(self, ball):
-       
-        
+
+    def ball_top_collide(self, ball):
+        """
+        check if ball collided with the top wall
+        """
         top_ball = ball._pos[0]
         top_wall = 0
 
-       
-            vy = self._balls[i]._velocity.getvy()
-            self._balls[i]._velocity.setvy(-vy)
-            # print('side')
+        if top_ball == top_wall:
+            return True
 
-        # hits the top
-        elif top_ball == top_wall:
-            vx = self._balls[i]._velocity.getvx()
-            self._balls[i]._velocity.setvx(-vx)
-            # print('top')
+        return False
 
+    def ball_brick_horizontal_collide(self, ball):
+        """
+            Above hori
+               V
+            [|||||]
 
+            [|||||]
+               ^
+        """
 
     def collide(self, ball):
 
@@ -140,24 +163,14 @@ class Game:
             return
 
         if self.ball_side_walls_collide(ball):
-            ball = reverse_vy()
-            return True
-
-        # paddle 
-        left_paddle = self._paddle._pos[1]
-        right_paddle = self._paddle._pos[1] +  self._paddle._size[1] - 1
-        height_paddle = self._paddle._pos[0]
-
-        height_ball = ball._pos[0]
-        left_ball = ball._pos[1]
-        right_ball = ball._pos[1] + ball._size[1]
-
-        # ball is just above paddle
-        if height_ball == height_paddle - 1:
-            if left_paddle <= left_ball and right_ball <= right_paddle:
-                handle_paddle_collisions()
-
-
+            ball.reverse_vy()
+        
+        elif ball_top_collide(ball):
+            ball.reverse_vx()
+        
+        elif ball_paddle_collide(ball):
+            ball_paddle_collide_handle(ball)
+      
         # bricks    
         if self.handle_brick_collisions():
             # print('brick')

@@ -40,4 +40,9 @@ class Ball(Meta):
         ).reshape(1, -1)
 
     def reverse_vy(self):
-        
+        vy = self._velocity.getvy()
+        self._velocity.setvy(-vy)
+
+    def reverse_vx(self):
+        vx = self._velocity.getvx()
+        self._velocity.setvx(-vx)
