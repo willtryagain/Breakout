@@ -18,7 +18,8 @@ class Paddle(Meta):
     def at_right_end(self):
         return self._pos[1] + self._size[1] >= self._gw 
 
-    def move(self, key, ball=None):   
+
+    def move(self, key):   
         if key == 'a':
             # move left
             self._pos[1] -= settings.PADDLE_SPEED
@@ -31,9 +32,6 @@ class Paddle(Meta):
             if self.at_right_end():
                 # upper bound
                 self._pos[1] = self._gw - self._size[1]
-       
-        if ball is not None:
-            ball._pos[1] = (2*self._pos[1] + self._size[1]) // 2
 
     def draw(self, len=20, color=Back.YELLOW):
 

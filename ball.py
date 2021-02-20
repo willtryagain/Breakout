@@ -43,6 +43,9 @@ class Ball(Meta):
         vy = self._velocity.getvy()
         self._velocity.setvy(-vy)
 
+    def set_posy(self, pos):
+        self._pos[1] = pos
+
     def reverse_vx(self):
         vx = self._velocity.getvx()
         self._velocity.setvx(-vx)

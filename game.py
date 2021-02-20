@@ -96,9 +96,7 @@ class Game:
 
         return ball
 
-    def handle_paddle_collisions(self):
-        for i in range(len(self._balls)):
-            self._balls[i] = self.ball_paddle_collide(self._balls[i])
+   
 
     def ball_paddle_collide(self, ball):
         """
@@ -149,84 +147,129 @@ class Game:
 
     def ball_brick_horizontal_collide(self, ball):
         """
-            Above hori
+            handle collision with brick 
+            atmost one at a time
+            Above brick
+               O
                V
             [|||||]
 
+            Below brick
             [|||||]
                ^
+               o
+
         """
+        for index, brick in enumerate(self._bricks):
+            left_brick = brick._pos[1]
+            right_brick = left_brick + brick._size[1] - 1
+
+            top_brick = brick._pos[0]
+            bottom_brick = top_brick + brick._size[0] - 1
+
+            top_ball = ball._pos[0]
+
+            left_ball = ball._pos[1]
+            right_ball = ball._pos[1] + ball._size[1] - 1
+      
+            in_between = (left_brick <= left_ball and right_ball <= right_brick)
+
+            if in_between:
+                # above
+                if top_ball == top_brick - 1:
+                    return index
+                # below
+                elif top_ball == bottom_brick + 1:
+                    return index
+           
+        return -1   
+
+    def ball_brick_vertical_collide(self, ball):
+        """
+            handle collision with brick 
+            atmost one at a time
+            Left of brick
+        
+            o   [|||||]
+
+            Right of brick
+                [|||||]    o
+        """
+        for index, brick in enumerate(self._bricks):
+            left_brick = brick._pos[1]
+            right_brick = left_brick + brick._size[1] - 1
+
+            top_brick = brick._pos[0]
+            bottom_brick = top_brick + brick._size[0] - 1
+
+            top_ball = ball._pos[0]
+            bottom_ball = ball._pos[0] + ball._size[0] - 1
+
+            left_ball = ball._pos[1]
+            right_ball = ball._pos[1] + ball._size[1] - 1
+      
+            in_between = (top_brick <= top_ball and bottom_ball <= bottom_brick)
+
+            if in_between:
+                # left
+                if right_ball == left_brick - 1:
+                    return index
+                # right
+                elif left_ball == right_brick + 1:
+                    return index
+           
+        return -1   
+
+    def lost_ball(self, ball):   
+        bottom_ball = ball._pos[0] + ball._size[0] - 1
+        bottom_display = self._height - 1
+
+        return bottom_ball >= bottom_display
 
     def collide(self, ball):
 
         if ball._dead:
-            return
+            return ball
 
         if self.ball_side_walls_collide(ball):
             ball.reverse_vy()
-        
-        elif ball_top_collide(ball):
-            ball.reverse_vx()
-        
-        elif ball_paddle_collide(ball):
-            ball_paddle_collide_handle(ball)
-      
-        # bricks    
-        if self.handle_brick_collisions():
-            # print('brick')
-            pass
+            return ball
 
+        if self.ball_top_collide(ball):
+            ball.reverse_vx()
+            return ball
+        
+        if self.ball_paddle_collide(ball):
+            self.ball_paddle_collide_handle(ball)
+            return ball
+      
+        index = self.ball_brick_horizontal_collide(ball)
+        if index != -1:
+            ball.reverse_vx()
+            self._bricks[index].decrease_strength(ball)
+            return ball
+
+        index = self.ball_brick_vertical_collide(ball)
+        if index != -1:
+            ball.reverse_vy()
+            self._bricks[index].decrease_strength(ball)
+            return ball
+
+        # intersect with bricks
 
         # fell down
-        if height_ball + ball._size[0] - 1 == self._height - 1:
-            self.reset()
-                # print('bottom')
+        if self.lost_ball(ball):
+            return self.reset_ball_paddle(ball)
 
          
-    def handle_ball_collisions(self):
-       
-      
+    def ball_collisions_handle(self):
+        new_balls = []
+        for ball in self._balls:
+            new_ball = self.collide(ball)
+            new_balls.append(new_ball)
+        return new_balls
 
-    def handle_brick_collisions(self):
-
-        hit = False
-        for i in range(len(self._balls)):
-            for brick in self._bricks:
-            
-                y0 = brick._pos[1]
-                x0 = brick._pos[0]
-                y1 = y0 + brick._size[1] - 1
-                x1 = x0 + brick._size[0] - 1
-
-
-                is_above = (self._balls[i]._pos[0] == x0 - 1)
-                is_below = (self._balls[i]._pos[0] == x1 + 1)
-                is_left = (self._balls[i]._pos[1] == brick._pos[1] - 1)
-                is_right = (self._balls[i]._pos[1] == brick._pos[1] + brick._size[1])
-                is_between_y = (y0 <= self._balls[i]._pos[1] and self._balls[i]._pos[1] + self._balls[i]._size[1] - 1 <= y1)
-                is_between_x = (x0 <= self._balls[i]._pos[0] and self._balls[i]._pos[0] + self._balls[i]._size[0] - 1 <= x1)
-                if (is_above or is_below) \
-                    and is_between_y:
-                    vx = self._balls[i]._velocity.getvx()
-                    self._balls[i]._velocity.setvx(-vx)
-                    brick.decrease_strength(self._balls[i])
-                    hit = True
-                
-                elif (is_left or is_right) \
-                    and is_between_x:
-                    vy = self._balls[i]._velocity.getvy()
-                    self._balls[i]._velocity.setvy(-vy)
-                    brick.decrease_strength(self._balls[i])
-                    hit = True
-            
-        return hit
-
-        
-
-    def remove(self):
-        self.remove_bricks()
-        self.remove_powerups()
-
+  
     def remove_bricks(self):
         indices = []
         for index, brick in enumerate(self._bricks):
@@ -235,7 +278,7 @@ class Game:
 
         indices.sort(reverse=True)
         for index in indices:
-            self._powerups[index]._state = 'ACTIVE'
+            self._powerups[index]._state = 'FALL'
             del self._bricks[index]
 
 
@@ -249,26 +292,54 @@ class Game:
         for index in indices:
             del self._powerups[index]
 
+    def remove_items(self):
+        self.remove_bricks()
+        self.remove_powerups()
+
+    def ball_paddle_centre(self, ball):
+        left_paddle = self._paddle._pos[1]
+        right_paddle = self._paddle._pos[1] +  self._paddle._size[1] - 1
+        mid = (left_paddle + right_paddle) // 2
+        ball.set_posy(mid)
+        return ball
+
     def handle_keys(self):
         if self._keyboard.kbhit():
         
             key = self._keyboard.getch()
 
+            # Pause / Unpause
             if key == 'p':
                 self.PAUSED = not self.PAUSED
-            if key == 'a' or key == 'd':
-                for i in range(len(self._balls)):
-                    if self._balls[i]._alive:
+
+            # Paddle left / right
+            elif key == 'a' or key == 'd':
+                new_balls = []
+                for ball in self._balls:
+                    if ball._alive:
                         self._paddle.move(key)
                     else:
-                        self._paddle.move(key, self._balls[i])
+                        self._paddle.move(key)
+                        self.ball_paddle_centre(ball)
+                    new_balls.append(ball)
+                self._balls = new_balls
             
+            # Ball left / right
             elif key == 'w' or key == 's':
-                for i in range(len(self._balls)):
-                    if not self._balls[i]._alive:
-                        self._balls[i].move(key)
+                new_balls = []
+                for ball in self._balls:
+                    if ball._alive:
+                        continue
+                    else:
+                        ball.move(key)
+                    new_balls.append(ball)
+                self._balls = new_balls
+            
+            # Start the game
             elif key == ' ':
                 for i in range(len(self._balls)):
+                    if self.ball_paddle_collide(ball):
+                        
                     if self._paddle._pos[1] <= self._balls[i]._pos[1] \
                         and self._balls[i]._pos[1] <= self._paddle._pos[1] + self._paddle._size[1] - 1 \
                         and not self._balls[i]._alive:
@@ -281,14 +352,14 @@ class Game:
             self._balls[i]._alive = True
         self.handle_paddle_collisions()
 
-    def reset(self):
-        for i in range(len(self._balls)):
-            self._balls[i]._alive = False
-            self._balls[i]._pos = [self._height-2, self._width//2 - 1]
-            self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
-            self._player.lose_life()
-            self._balls[i]._velocity.setvx(0)
-            self._balls[i]._velocity.setvy(0)
+    def reset_ball_paddle(self, ball):
+        ball._alive = False
+        ball._pos = [self._height-2, self._width//2 - 1]
+        self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
+        self._player.lose_life()
+        ball._velocity.setvx(0)
+        ball._velocity.setvy(0)
+        return ball
 
     def move_items(self):
         balls = []
@@ -323,7 +394,7 @@ class Game:
                     pass
                 continue
             self.move_items()
-            self.handle_ball_collisions()
+            self._balls = self.ball_collisions_handle()
             for powerup in self._powerups:
                 if powerup._state == 'ACTIVE':
                     balls = powerup.handle_collision(self._paddle, self._balls)
