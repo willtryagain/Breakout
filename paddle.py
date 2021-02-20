@@ -44,7 +44,7 @@ class Paddle(Meta):
 
     def update(self, value=0, reset=False):
         
-        len = self._size[1] - 2 + value
+        len = max(self._size[1] - 2 + value, 1)
         if reset:
             len = 20
         self._ascii = self.draw(len)

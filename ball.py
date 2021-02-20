@@ -50,4 +50,18 @@ class Ball(Meta):
         vx = self._velocity.getvx()
         self._velocity.setvx(-vx)
 
+    def intersects(self, display):
+        x0 = self._pos[0]
+        y0 = self._pos[1]
+        x1 = self._pos[0] + self._size[0] - 1
+        y1 = self._pos[1] + self._size[1] - 1
+        if display.colored(x0, y0) or display.colored(x1, y1):
+            return True
+        return False
+
+    def down(self):
+        self._pos[0] += 1
+
+    def up(self):
+        self._pos[0] -= 1
     

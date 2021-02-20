@@ -3,6 +3,9 @@ from colorama import Fore, Back, Style
 
 class Display:
 
+    START = '\033[0;0H'
+    ERASE = '\033[2J'
+
     def __init__(self, height, width):
         self._height = height
         self._width = width
@@ -43,5 +46,20 @@ class Display:
                 print(self._back[i][j] + self._canvas[i][j], end='')
             print() #next line
     
+    def end_game(self, player):
+        print(Style.RESET_ALL + self.ERASE + self.START + '\n'*3)
+        # arr = []
+        # try:
+        #     with open(path, 'r') as f:
+        #         for line in f:
+        #             arr.append(list(line.strip('\n')))
+        # except FileNotFoundError as e:
+        #     return None
+
+        # return np.array(arr, dtype='object')
+        # ascii =
+
+    def colored(self, x, y):
+        return self._canvas[x][y] != ' '
 
             

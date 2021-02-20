@@ -33,7 +33,8 @@ class Powerup(Meta):
         else:
             # the powerup fell down
             # it can't be used anymore
-            self._state = 'DESTROY'
+            self._state = 'DELETE'
+        
  
     
     def collision(self, paddle):

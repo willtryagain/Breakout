@@ -19,5 +19,6 @@ class Expand(Powerup):
         """
         deactivate the powerup
         """
+        self._state = 'DELETE'
         paddle.update(-settings.EXPAND_VAL)
         return paddle
