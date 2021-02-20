@@ -8,7 +8,7 @@ from ball import Ball
 from paddle import Paddle
 from brick import Brick
 from player import Player
-from powerup import Powerup
+from expand import Expand
 from fastball import Fastball
 from thruball import Thruball
 from ballmulti import Ballmulti
@@ -40,7 +40,7 @@ class Game:
         """
         powerups = []
         for brick in self._bricks:
-            powerup = Ballmulti(self._height, self._width, brick._pos, clock())
+            powerup = Expand(self._height, self._width, brick._pos, clock())
             powerups.append(powerup)
 
         return powerups    
@@ -84,10 +84,10 @@ class Game:
         else:
             # go right
             sign = 1
-        vx = self._balls[i]._velocity.getvx()
+        vx = ball._velocity.getvx()
         vx = max(vx, 1)
         # distance from the middle
-        factor = abs(mid - self._balls[i]._pos[1]) // 2
+        factor = abs(mid - ball._pos[1]) // 2
         factor = max(factor, 1)
         vy = sign * factor
 
@@ -229,28 +229,34 @@ class Game:
     def collide(self, ball):
 
         if ball._dead:
+            print('1')
             return ball
 
         if self.ball_side_walls_collide(ball):
+            print('2')
             ball.reverse_vy()
             return ball
 
         if self.ball_top_collide(ball):
+            print('3')
             ball.reverse_vx()
             return ball
         
         if self.ball_paddle_collide(ball):
-            self.ball_paddle_collide_handle(ball)
+            print('4')
+            ball = self.ball_paddle_collide_handle(ball)
             return ball
       
         index = self.ball_brick_horizontal_collide(ball)
         if index != -1:
+            print('5')
             ball.reverse_vx()
             self._bricks[index].decrease_strength(ball)
             return ball
 
         index = self.ball_brick_vertical_collide(ball)
         if index != -1:
+            print('6')
             ball.reverse_vy()
             self._bricks[index].decrease_strength(ball)
             return ball
@@ -259,14 +265,16 @@ class Game:
 
         # fell down
         if self.lost_ball(ball):
+            print('7')
             return self.reset_ball_paddle(ball)
 
+        return ball
          
     def ball_collisions_handle(self):
         new_balls = []
         for ball in self._balls:
-            new_ball = self.collide(ball)
-            new_balls.append(new_ball)
+            ball = self.collide(ball)
+            new_balls.append(ball)
         return new_balls
 
   
@@ -316,7 +324,7 @@ class Game:
             elif key == 'a' or key == 'd':
                 new_balls = []
                 for ball in self._balls:
-                    if ball._alive:
+                    if not ball._dead:
                         self._paddle.move(key)
                     else:
                         self._paddle.move(key)
@@ -328,7 +336,7 @@ class Game:
             elif key == 'w' or key == 's':
                 new_balls = []
                 for ball in self._balls:
-                    if ball._alive:
+                    if not ball._dead:
                         continue
                     else:
                         ball.move(key)
@@ -337,23 +345,19 @@ class Game:
             
             # Start the game
             elif key == ' ':
-                for i in range(len(self._balls)):
+                new_balls = []
+                for ball in self._balls:
+                    ball._dead = False
                     if self.ball_paddle_collide(ball):
-                        
-                    if self._paddle._pos[1] <= self._balls[i]._pos[1] \
-                        and self._balls[i]._pos[1] <= self._paddle._pos[1] + self._paddle._size[1] - 1 \
-                        and not self._balls[i]._alive:
-                        self.restart()
+                        ball = self.ball_paddle_collide_handle(ball)
+                    new_balls.append(ball)    
+                self._balls = new_balls
 
             self._keyboard.flush()
-
-    def restart(self):
-        for i in range(len(self._balls)):
-            self._balls[i]._alive = True
-        self.handle_paddle_collisions()
+       
 
     def reset_ball_paddle(self, ball):
-        ball._alive = False
+        ball._dead = True
         ball._pos = [self._height-2, self._width//2 - 1]
         self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
         self._player.lose_life()
@@ -362,52 +366,59 @@ class Game:
         return ball
 
     def move_items(self):
-        balls = []
+        new_balls = []
         for ball in self._balls:
-            balls.append(ball)
-        self._balls = []
-        for ball in balls:
             ball.move()
-            self._balls.append(ball)
+            new_balls.append(ball)
+        self._balls = new_balls
+
         for powerup in self._powerups:
-            if powerup._state == 'ACTIVE':
+            if powerup._state == 'FALL':
                 powerup.move()
         
     def add_items(self):
-        for i in range(len(self._balls)):
-            self._display.put(self._balls[i])
+
+        # put the balls
+        for ball in self._balls:
+            self._display.put(ball)
+
         self._display.put(self._paddle)
+
         for brick in self._bricks:
             if brick._strength:
                 self._display.put(brick)
+
         for powerup in self._powerups:
-            if powerup._state == 'ACTIVE':
+            if powerup._state == 'FALL':
                 self._display.put(powerup)
+
+    def powerup_handle(self):
+        for powerup in self._powerups:
+            if powerup._state == 'FALL':
+                if powerup.collision(self._paddle):
+                    # assuming Expand
+                    self._paddle = powerup.magic(self._paddle)
+                
+            elif powerup._state == 'ACTIVE':
+                if powerup.time_up():
+                    self._paddle = powerup.reverse(self._paddle)
 
     def mainloop(self):
         while True:
             time = clock()
             self.handle_keys()
-            print(self._width)
             if self.PAUSED:
                 while clock() - time < 0.1:
                     pass
                 continue
             self.move_items()
+            
             self._balls = self.ball_collisions_handle()
-            for powerup in self._powerups:
-                if powerup._state == 'ACTIVE':
-                    balls = powerup.handle_collision(self._paddle, self._balls)
-                    if balls is not None:
-                        self._balls = balls
-                    
-                elif powerup._state == 'IN_USE':
-                    if clock() - powerup._start_time >= 40:
-                        powerup._state == 'DELETE'
-                        self._paddle.update(reset=True)
+            self.powerup_handle()
+            
 
     
-            self.remove()
+            self.remove_items()
 
             self._display.clrscr()
             self.add_items()

@@ -1,5 +1,6 @@
 import numpy as np
 from colorama import Fore, Back, Style
+from time import monotonic as clock, sleep
 
 from meta import Meta
 from velocity import Velocity
@@ -40,11 +41,24 @@ class Powerup(Meta):
         return true if collision 
         has taken place with the paddle
         """
-        l = paddle._pos[1]
-        r = paddle._pos[1] + paddle._size[1] - 1
-        if self._pos[0] == self._gh - 2:
-            if l <= self._pos[1] and self._pos[1] + self._size[1] <= r:
+        left_paddle = paddle._pos[1]
+        right_paddle = paddle._pos[1] + paddle._size[1] - 1
+        top_paddle = paddle._pos[0]
+
+        left_powerup = self._pos[1]
+        right_powerup = self._pos[1] + self._size[1] - 1
+        bottom_powerup = self._pos[0] + self._size[0] - 1
+        if bottom_powerup == top_paddle - 1:
+            if left_paddle <= left_powerup and right_powerup <= right_paddle:
                 self._state = 'ACTIVE'
+                self._start_time = clock()
                 return True
 
+        return False
+
+    def time_up(self):
+        if clock() - self._start_time >= settings.POWERUP_TIME:
+            self._state == 'DELETE' 
+            return True
+        
         return False

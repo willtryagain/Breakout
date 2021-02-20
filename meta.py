@@ -2,14 +2,14 @@ import numpy as np
 
 
 class Meta:
-     '''
-        -----> Y
-        |
-        |
-        v 
-        X 
+    '''
+    -----> Y
+    |
+    |
+    v 
+    X 
 
-        '''
+    '''
     def __init__(self, game_height, game_width, pos, size, ascii):
 
         self._gh = game_height

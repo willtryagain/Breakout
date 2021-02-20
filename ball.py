@@ -7,7 +7,7 @@ from velocity import Velocity
 class Ball(Meta):
     def __init__(self, game_height, game_width, pos):
         self._ascii = self.draw()
-        self._alive = False
+        self._dead = True
         self._thru = False
         self._velocity = Velocity(0, 0) # composition
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
@@ -49,3 +49,5 @@ class Ball(Meta):
     def reverse_vx(self):
         vx = self._velocity.getvx()
         self._velocity.setvx(-vx)
+
+    
