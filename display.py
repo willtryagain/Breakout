@@ -21,6 +21,17 @@ class Display:
             ], dtype='object'
         )
        
+    def get_text(self, path='rip.txt'):
+        text = []
+        try:
+            with open(path, 'r') as f:
+                for line in f:
+                    text.append([line.strip('\n')])
+        except FileNotFoundError as e:
+            print(e)
+        return np.array(text, dtype='object')
+        
+
     def put(self, item):
         pos = item.get_pos()
         tail = item.get_tail()
@@ -35,20 +46,18 @@ class Display:
             for j in range(self._width):
                 self._canvas[i][j] = ' '
 
-    def alert(self, color, times=3):
-        cover = np.array([[color + ' ' for j in range(self._width)] for i in range(self._height)], dtype='object')
-
-        while times:
-            times -= 1
-            print(self.START)
-            for i in range(self._height):
-                for j in range(self._width):
-                    print(cover[i][j], end='')
-                print('')
-            sleep(0.1)
-            self.show()
-            sleep(0.2)
-
+    def alert(self, color=Fore.RED):
+        rip = self.get_text()
+        if rip is None:
+           return
+        print(self.START)
+        print(color, end='')
+        for i in range(rip.shape[0]):
+            for j in range(rip.shape[1]):
+                print(rip[i][j], end='')
+            print('')
+        sleep(2)
+        print(Style.RESET_ALL + self.ERASE + self.START + '\n')
     def show(self):
         """
         Show the canvas on the terminal

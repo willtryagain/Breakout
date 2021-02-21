@@ -27,5 +27,23 @@ The `Display` class is responsible for showing all the objects on the console.
 ### Paddle 
 The `Paddle` class is responsible for movement and appearance of paddle. It inherits from Meta class.
 
-### Powerup
+### Brick 
+The `Brick` class is responsible for strength and color of bricks.
 
+### Ball 
+The `Ball` class handles the movement of the ball. It also has a function called go_fast which is invoked when the fastball powerup is activated.
+
+### Powerup
+It is the parent class of all the powerups. This handles the movement of the powerup and the collision with the paddle.
+
+* #### Expand 
+    Expand Paddle: Increases the size of the paddle by a certain amount.
+* #### Shrink 
+    Shrink Paddle: Reduce the size of the paddle by a certain amount but not completely.
+* #### Fastball 
+    Increases the speed of the ball.
+* #### Thruball 
+    Thru-ball: This enables the ball to destroy and go through any brick it touches, irrespective of the
+strength of the wall.(Even the unbreakable ones which you couldn’t previously destroy)
+* #### Pgrab 
+    Paddle Grab: Allows the paddle to grab the ball on contact and relaunch the ball at will.

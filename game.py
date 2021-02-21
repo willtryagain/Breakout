@@ -334,18 +334,16 @@ class Game:
             self._bricks[index].repaint_brick()
             return ball
 
-        
-        # fell down
-        if self.lost_ball(ball):
-            
-            return self.reset_game(ball)
-
         return ball
          
     def ball_collisions_handle(self):
         new_balls = []
         for ball in self._balls:
             ball = self.collide(ball)
+            if self.lost_ball(ball):
+                ball =  self.reset_game(ball)
+                new_balls = [ball]
+                break
             new_balls.append(ball)
         return new_balls
 
@@ -465,7 +463,7 @@ class Game:
         self._display.show()
 
         ball._dead = True
-        # self._display.alert(Back.RED)
+        self._display.alert()
         self._powerups = self.deactivate()
         self._paddle.reset()
         ball._pos[0] = self._height-2
