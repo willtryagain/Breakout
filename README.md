@@ -18,4 +18,14 @@ This is a CLI game written in Python3, inspired by the original **Breakout**. Th
 ## Classes
 These are the classes used in the game
 ### Game
-The `Game` class encapsulates the entire game.
+The `Game` class manages all the other the classes. It handles collisions between objects, adding and removing items from screen. 
+### Meta
+The `Meta` class is responsible for storing the coordinates and ascii representation of objects. It forms a backbone of all the object classes visible on the screen.
+### Display
+The `Display` class is responsible for showing all the objects on the console.
+
+### Paddle 
+The `Paddle` class is responsible for movement and appearance of paddle. It inherits from Meta class.
+
+### Powerup
+

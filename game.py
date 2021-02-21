@@ -77,14 +77,31 @@ class Game:
 
         return bricks
 
+    def ball_paddle_collide(self, ball):
+        """
+        check if ball collided with the paddle 
+        """
+        left_paddle = self._paddle._pos[1]
+        right_paddle = self._paddle._pos[1] +  self._paddle._size[1] - 1
+        height_paddle = self._paddle._pos[0]
+
+        height_ball = ball._pos[0]
+        left_ball = ball._pos[1]
+        right_ball = ball._pos[1] + ball._size[1]
+
+        # ball is just above paddle
+        if height_ball == height_paddle - 1:
+            if left_paddle <= left_ball and right_ball <= right_paddle:
+                return True
+        
+        return False
 
     def ball_paddle_collide_handle(self, ball):
         if ball._dead or self._paddle._grab:
             ball._velocity.setvx(-1)
             ball._velocity.setvy(1)
 
-
-        # middle position of paddle
+         # middle position of paddle
         mid = (2*self._paddle._pos[1] + self._paddle._size[1] - 1) // 2
 
         # in first half 
@@ -109,27 +126,6 @@ class Game:
         ball._velocity.setvy(vy)
 
         return ball
-
-   
-
-    def ball_paddle_collide(self, ball):
-        """
-        check if ball collided with the paddle 
-        """
-        left_paddle = self._paddle._pos[1]
-        right_paddle = self._paddle._pos[1] +  self._paddle._size[1] - 1
-        height_paddle = self._paddle._pos[0]
-
-        height_ball = ball._pos[0]
-        left_ball = ball._pos[1]
-        right_ball = ball._pos[1] + ball._size[1]
-
-        # ball is just above paddle
-        if height_ball == height_paddle - 1:
-            if left_paddle <= left_ball and right_ball <= right_paddle:
-                return True
-        
-        return False
 
     def ball_side_walls_collide(self, ball):
         """
@@ -262,15 +258,12 @@ class Game:
            
         return -1   
 
-
     def lost_ball(self, ball):   
         bottom_ball = ball._pos[0] + ball._size[0]
         bottom_display = self._height 
         
         return bottom_ball >= bottom_display
 
-
- 
     def ball_brick_intersection(self, ball):
         global debug
         vx = ball._velocity.getvx()
@@ -317,7 +310,7 @@ class Game:
       
         index = self.ball_brick_corners_collide(ball)
         if index != -1:
-            debug += 'corners\n'
+            # debug += 'corners\n'
             ball.reverse_vx()
             self._player._score += \
                 self._bricks[index].get_damage_points(self._player, ball)
@@ -462,7 +455,6 @@ class Game:
                 self._balls = new_balls
             self._keyboard.flush()
        
-
     def reset_game(self, ball):
         global debug 
         self.remove_items()
@@ -477,6 +469,8 @@ class Game:
         ball._pos[0] = self._height-2
         ball._pos[1] = randint(self._paddle._pos[1], self._paddle._pos[1] + self._paddle._size[1] - 2)
         self._player.lose_life()
+        if self._player._lives == 0:
+            self.end_game()
         ball._velocity.setvx(0)
         ball._velocity.setvy(0)
         return ball
@@ -494,6 +488,7 @@ class Game:
                 powerup.move()
             powerups.append(powerup)
         self._powerups = powerups
+
     def add_items(self):
 
         # put the balls
@@ -510,12 +505,23 @@ class Game:
             if powerup._state == 'FALL':
                 self._display.put(powerup)
 
-
     def powerup_magic(self, powerup):
         if powerup._kind == 'multi':
             self._balls = powerup.magic(self._balls)
         elif powerup._kind == 'pgrab':
             self._paddle = powerup.magic(self._paddle, self._balls[0])
+        elif powerup._kind == 'fastball':
+            self._balls = powerup.magic(self._balls)
+        else:
+            self._paddle = powerup.magic(self._paddle)
+
+    def powerup_reverse(self, powerup):
+        if powerup._kind == 'multi':
+            self._balls = powerup.magic(self._balls)
+        elif powerup._kind == 'pgrab':
+            self._paddle = powerup.magic(self._paddle, self._balls[0])
+        elif powerup._kind == 'fastball':
+            self._balls = powerup.reverse(self._balls)
         else:
             self._paddle = powerup.magic(self._paddle)
 
@@ -526,12 +532,13 @@ class Game:
             if powerup._state == 'FALL':
                 if powerup.collision(self._paddle):
                     self.powerup_magic(powerup)
-                    # debug += 'magic\n'
+                    if self._balls[0]._fast:
+                        self._balls[0].go_fast()
+                    debug += 'magic\n'
                 
             elif powerup._state == 'ACTIVE':
                 if powerup.time_up():
-                    self._paddle = powerup.reverse(self._paddle)
-                    # debug += 'reverse\n'
+                    self.powerup_reverse(powerup)
             powerups.append(powerup)
         self._powerups = powerups
 
@@ -571,14 +578,6 @@ class Game:
             self._display.clrscr()
             self.add_items()
             self._display.show()
-            self._player.display_stats(self._paddle._size[1])
+            self._player.display_stats(self._paddle._size[1], self._balls[0])
             self.wait(time) 
-            
-            debug += str(self._balls[0]._pos[0]) + ':' +   str(self._balls[0]._pos[1]) + '\n'
-            index = len(self._bricks) - 1
-            debug += str(self._bricks[index]._pos[0]) + ':' +   str(self._bricks[index]._pos[1]) + '\n'
-            debug += '\n'
-
-            # if len(self._powerups):
-            #     debug += str(self._powerups[0]._pos[0]) 
-            #     debug += '\n'
+            debug += str(self._balls[0]._fast) + '\n'

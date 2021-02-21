@@ -1,6 +1,7 @@
 import numpy as np
 from colorama import Fore, Back, Style
 
+import settings
 from meta import Meta
 from velocity import Velocity
 
@@ -9,8 +10,25 @@ class Ball(Meta):
         self._ascii = self.draw()
         self._dead = True
         self._thru = False
+        self._fast = False
         self._velocity = Velocity(0, 0) # composition
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
+
+
+    def go_fast(self):
+        vx = self._velocity.getvx()
+        vy = self._velocity.getvy()
+        if vx > 0:
+            vx = settings.MAX_SPEED
+        else:
+            vx = -settings.MAX_SPEED
+        if vy > 0:
+            vy = settings.MAX_SPEED
+        else:
+            vy = -settings.MAX_SPEED
+        self._velocity.setvx(vx)
+        self._velocity.setvy(vy)
+
 
     def move(self, key=None):
         if key is not None:
@@ -19,6 +37,8 @@ class Ball(Meta):
             elif key == 's':
                 self._pos[1] -= 1
             return
+
+
 
         # increment by the velocities
         self._pos[0] += self._velocity.vx
