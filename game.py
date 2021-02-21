@@ -2,17 +2,22 @@ import os
 import sys
 from time import monotonic as clock, sleep
 from colorama import Fore, Back, Style
-from random import random, choice
+from random import random, choice, randint
 
 import settings
 from ball import Ball
 from paddle import Paddle
 from brick import Brick
 from player import Player
+
+from powerup import Powerup
 from expand import Expand
+from shrink import Shrink
 from fastball import Fastball
 from thruball import Thruball
-from ballmulti import Ballmulti
+from multi import Multi
+from pgrab import Pgrab
+
 from kbhit import KBHit
 from display import Display
 from velocity import Velocity
@@ -35,17 +40,6 @@ class Game:
         self._bricks = self.get_brick_pattern()
         self._powerups = [] # self.add_powerups()
         self._player = Player()
-
-    def add_powerups(self):
-        """
-        add powerups to bricks
-        """
-        powerups = []
-        for brick in self._bricks:
-            powerup = Expand(self._height, self._width, brick._pos, clock())
-            powerups.append(powerup)
-
-        return powerups    
 
     def get_brick_pattern(self):
         """
@@ -83,7 +77,12 @@ class Game:
 
         return bricks
 
+
     def ball_paddle_collide_handle(self, ball):
+        if ball._dead or self._paddle._grab:
+            ball._velocity.setvx(-1)
+            ball._velocity.setvy(1)
+
 
         # middle position of paddle
         mid = (2*self._paddle._pos[1] + self._paddle._size[1] - 1) // 2
@@ -96,13 +95,17 @@ class Game:
             # go right
             sign = 1
         vx = ball._velocity.getvx()
-        vx = max(vx, 1)
-        # distance from the middle
-        factor = abs(mid - ball._pos[1]) // 2
-        factor = max(factor, 1)
-        vy = sign * factor
+        if vx > 0:
+            raise ValueError('check vx')
 
-        ball._velocity.setvx(-vx) 
+        vy = ball._velocity.getvy()
+
+        # distance from the middle
+        bias = abs(mid - ball._pos[1]) // 4
+        
+
+        vy = sign * abs(Powerup.inc_mag(vy, bias))
+        ball._velocity.setvx(vx) 
         ball._velocity.setvy(vy)
 
         return ball
@@ -262,19 +265,19 @@ class Game:
 
     def lost_ball(self, ball):   
         bottom_ball = ball._pos[0] + ball._size[0]
-        bottom_display = self._height
+        bottom_display = self._height 
         
         return bottom_ball >= bottom_display
 
 
-
+ 
     def ball_brick_intersection(self, ball):
         global debug
         vx = ball._velocity.getvx()
         vy = ball._velocity.getvy()
         while ball.intersects(self._bricks):
             if vx < 0: 
-                ball.down()
+                ball.down() 
             else:
                 ball.up()
 
@@ -301,7 +304,12 @@ class Game:
             return ball
         
         if self.ball_paddle_collide(ball):
-            ball = self.ball_paddle_collide_handle(ball)
+            if self._paddle._grab:
+                ball._velocity.setvx(0)
+                ball._velocity.setvy(0)
+            else:
+                ball.reverse_vx()
+                ball = self.ball_paddle_collide_handle(ball)
             return ball
 
         if ball.intersects(self._bricks):
@@ -336,8 +344,8 @@ class Game:
         
         # fell down
         if self.lost_ball(ball):
-            self._display.alert(Back.RED)
-            return self.reset_ball_paddle(ball)
+           
+            return self.reset_game(ball)
 
         return ball
          
@@ -348,7 +356,23 @@ class Game:
             new_balls.append(ball)
         return new_balls
 
-  
+    def get_powerup(self, pos):
+        type = choice(['expand', 'shrink', 'fastball', 'pgrab'])
+        type = choice(['fastball'])
+
+        if type == 'expand':
+            powerup = Expand(self._height, self._width, pos, clock())
+        elif type == 'shrink':  
+            powerup = Shrink(self._height, self._width, pos, clock())
+        elif type == 'fastball':
+            powerup = Fastball(self._height, self._width, pos, clock())
+        elif type == 'multi':
+            powerup = Multi(self._height, self._width, pos, clock())
+        elif type == 'pgrab':
+            powerup = Pgrab(self._height, self._width, pos, clock())   
+        powerup._state = 'FALL'
+        return powerup
+
     def remove_bricks(self):
         global debug 
         indices = []
@@ -356,8 +380,7 @@ class Game:
             if brick._strength == 0:
                 indices.append(index)
                 pos = [brick._pos[0], brick._pos[1]]
-                powerup = Expand(self._height, self._width, pos, clock())
-                powerup._state = 'FALL'
+                powerup = self.get_powerup(pos)
                 self._powerups.append(powerup)
 
         indices.sort(reverse=True)
@@ -380,10 +403,16 @@ class Game:
         self.remove_bricks()
         self.remove_powerups()
 
-    def ball_paddle_centre(self, ball):
+    def ball_paddle_centre(self, ball, rel=None):
         left_paddle = self._paddle._pos[1]
         right_paddle = self._paddle._pos[1] +  self._paddle._size[1] - 1
         mid = (left_paddle + right_paddle) // 2
+        
+        if rel:
+            y = left_paddle + rel
+            ball.set_posy(y)
+            return ball
+       
         ball.set_posy(mid)
         return ball
 
@@ -405,11 +434,9 @@ class Game:
             elif key == 'a' or key == 'd':
                 new_balls = []
                 for ball in self._balls:
-                    if not ball._dead:
-                        self._paddle.move(key)
-                    else:
-                        self._paddle.move(key)
-                        self.ball_paddle_centre(ball)
+                    self._paddle.move(key)
+                    if  ball._dead or (self._paddle._grab and ball._velocity.getvx() == 0):
+                        self.ball_paddle_centre(ball, rel=None)
                     new_balls.append(ball)
                 self._balls = new_balls
             
@@ -428,22 +455,29 @@ class Game:
             elif key == ' ':
                 new_balls = []
                 for ball in self._balls:
-                    ball._dead = False
                     if self.ball_paddle_collide(ball):
                         ball = self.ball_paddle_collide_handle(ball)
+                        ball._dead = False
                     new_balls.append(ball)    
                 self._balls = new_balls
             self._keyboard.flush()
        
 
-    def reset_ball_paddle(self, ball):
+    def reset_game(self, ball):
         global debug 
+        self.remove_items()
+        self._display.clrscr()
+        self.add_items()
+        self._display.show()
+
         ball._dead = True
-        ball._pos = [self._height-2, self._width//2 - 1]
-        self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
+        # self._display.alert(Back.RED)
+        self._powerups = self.deactivate()
+        self._paddle.reset()
+        ball._pos[0] = self._height-2
+        ball._pos[1] = randint(self._paddle._pos[1], self._paddle._pos[1] + self._paddle._size[1] - 2)
         self._player.lose_life()
         ball._velocity.setvx(0)
-        # debug += 'reset\n'
         ball._velocity.setvy(0)
         return ball
 
@@ -476,14 +510,22 @@ class Game:
             if powerup._state == 'FALL':
                 self._display.put(powerup)
 
+
+    def powerup_magic(self, powerup):
+        if powerup._kind == 'multi':
+            self._balls = powerup.magic(self._balls)
+        elif powerup._kind == 'pgrab':
+            self._paddle = powerup.magic(self._paddle, self._balls[0])
+        else:
+            self._paddle = powerup.magic(self._paddle)
+
     def powerup_handle(self):
         global debug
         powerups = []
         for powerup in self._powerups:
             if powerup._state == 'FALL':
                 if powerup.collision(self._paddle):
-                    # assuming Expand
-                    self._paddle = powerup.magic(self._paddle)
+                    self.powerup_magic(powerup)
                     # debug += 'magic\n'
                 
             elif powerup._state == 'ACTIVE':
@@ -504,15 +546,23 @@ class Game:
         out.close
         sys.exit(0) 
 
+    def deactivate(self):
+        powerups = []
+        for powerup in self._powerups:
+            if powerup._state == 'ACTIVE':
+                powerup._state = 'DELETE'
+            powerups.append(powerup)
+        return powerups
+
     def mainloop(self):
         global debug
         while True:
             time = clock()
-            
             self.handle_keys()
             if self.PAUSED:
                 self.wait(time)
                 continue
+            
             self.move_items()
             
             self._balls = self.ball_collisions_handle()

@@ -21,6 +21,7 @@ class Powerup(Meta):
             Back.MAGENTA + '>'], 
             dtype='object').reshape(1, -1)
         self._start_time = start_time
+        self._kind = ''
        
         self._velocity = Velocity(vx = settings.POWERUP_SPEED)
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
@@ -63,3 +64,11 @@ class Powerup(Meta):
             return True
         
         return False
+
+    def inc_mag(self, x, bias=2):
+        if x == 0:
+            return x
+        sign = x // abs(x)
+        mag = abs(x)+ bias
+        mag = min(mag, settings.MAX_SPEED)
+        return sign * mag 

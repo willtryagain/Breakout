@@ -6,13 +6,14 @@ This is a CLI game written in Python3, inspired by the original **Breakout**. Th
 
 
 ## Controls
-- <kbd>W</kbd>: move the ball left before starting
+- <kbd>W</kbd>: move the ball right 
 - <kbd>A</kbd>: move the paddle left
-- <kbd>S</kbd>: move the ball right before starting
+- <kbd>S</kbd>: move the ball left
 - <kbd>D</kbd>: move the paddle right
 
 - <kbd>SPACE</kbd>: move the ball if lost a life
 - <kbd>P</kbd>: pause / unpause
+- <kbd>Q</kbd>: quit
 
 ## Classes
 These are the classes used in the game
