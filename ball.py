@@ -39,6 +39,7 @@ class Ball(Meta):
             dtype='object'
         ).reshape(1, -1)
 
+
     def reverse_vy(self):
         vy = self._velocity.getvy()
         self._velocity.setvy(-vy)
@@ -50,14 +51,27 @@ class Ball(Meta):
         vx = self._velocity.getvx()
         self._velocity.setvx(-vx)
 
-    def intersects(self, display):
-        x0 = self._pos[0]
-        y0 = self._pos[1]
-        x1 = self._pos[0] + self._size[0] - 1
-        y1 = self._pos[1] + self._size[1] - 1
-        if display.colored(x0, y0) or display.colored(x1, y1):
-            return True
+    def intersects(self, bricks):
+        left_ball = self._pos[1]
+        right_ball = self._pos[1] + self._size[1] - 1
+        top_ball = self._pos[0]
+
+        for brick in bricks:
+            left_brick = brick._pos[1]
+            right_brick = brick._pos[1] + brick._size[1] - 1
+            top_brick = brick._pos[0]
+
+            if top_brick == top_ball:
+                if left_brick <= right_ball and right_ball <= right_brick:
+                    return True
+
         return False
+
+    def left(self):
+        self._pos[1] -= 1
+    
+    def right(self):
+        self._pos[1] += 1
 
     def down(self):
         self._pos[0] += 1

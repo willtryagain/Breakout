@@ -2,7 +2,7 @@ import os
 import sys
 from time import monotonic as clock, sleep
 from colorama import Fore, Back, Style
-from random import random
+from random import random, choice
 
 import settings
 from ball import Ball
@@ -33,7 +33,7 @@ class Game:
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
         self._bricks = self.get_brick_pattern()
-        self._powerups = self.add_powerups()
+        self._powerups = [] # self.add_powerups()
         self._player = Player()
 
     def add_powerups(self):
@@ -56,21 +56,30 @@ class Game:
         y0 = self._width // 2
         h = 1
         w = 5
-        level = 1
+        level = y0//8
 
-        # for i in range(level):
-        #     for j in range(-i, i+1):
-        #         brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
-        #         bricks.append(brick)
+        for i in range(level):
+            for j in range(-i, i+1):
+                brick = Brick(self._height, self._width, pos=[x0 + i*h, y0 + j*w])
+                brick._strength = choice([1, 2, 3, 'INFINITY'])
+                brick.repaint_brick()
+                bricks.append(brick)
 
         for j in range(-level-settings.BRICK_LENGTH, level+settings.BRICK_LENGTH + 1):
+            if y0 + j*w >= self._width \
+                or y0 + j*w < 0:
+                continue
             brick = Brick(self._height, self._width, pos=[x0 + level*h, y0 + j*w])
+            brick._strength = choice([1, 2, 3, 'INFINITY'])
+            brick.repaint_brick()
             bricks.append(brick)
 
-        # for i in range(level-1, -1, -1):
-        #     for j in range(-i, i+1):
-        #         brick = Brick(self._height, self._width, pos=[x0 + (level +  level - i)*h, y0 + j*w])
-        #         bricks.append(brick)
+        for i in range(level-1, -1, -1):
+            for j in range(-i, i+1):
+                brick = Brick(self._height, self._width, pos=[x0 + (level +  level - i)*h, y0 + j*w])
+                brick._strength = choice([1, 2, 3, 'INFINITY'])
+                brick.repaint_brick()
+                bricks.append(brick)
 
         return bricks
 
@@ -170,15 +179,17 @@ class Game:
             bottom_brick = top_brick + brick._size[0] - 1
 
             top_ball = ball._pos[0]
+            bottom_ball = ball._pos[0] + ball._size[0] - 1
+
 
             left_ball = ball._pos[1]
             right_ball = ball._pos[1] + ball._size[1] - 1
       
-            in_between = (left_brick <= left_ball and right_ball <= right_brick)
+            in_between = (left_brick <= right_ball and right_ball <= right_brick)
 
             if in_between:
                 # above
-                if top_ball == top_brick - 1:
+                if bottom_ball == top_brick - 1:
                     return index
                 # below
                 elif top_ball == bottom_brick + 1:
@@ -210,14 +221,14 @@ class Game:
             left_ball = ball._pos[1]
             right_ball = ball._pos[1] + ball._size[1] - 1
       
-            in_between = (top_brick <= top_ball and bottom_ball <= bottom_brick)
+            in_between = (top_brick <= bottom_ball and bottom_ball <= bottom_brick)
 
             if in_between:
                 # left
-                if right_ball == left_brick - 1:
+                if right_ball == left_brick:
                     return index
                 # right
-                elif left_ball == right_brick + 1:
+                elif left_ball == right_brick:
                     return index
            
         return -1   
@@ -228,20 +239,30 @@ class Game:
 
         return bottom_ball >= bottom_display
 
+
+
     def ball_brick_intersection(self, ball):
+        global debug
         vx = ball._velocity.getvx()
-        if vx < 0: 
-            while ball.intersects(self._display):
+        vy = ball._velocity.getvy()
+        while ball.intersects(self._bricks):
+            if vx < 0: 
                 ball.down()
-        else:
-            while ball.intersects(self._display):
+            else:
                 ball.up()
+
+            if vy < 0:
+                ball.right()
+            else:
+                ball.left()
+        # debug += str(self.ball_brick_horizontal_collide(ball)) + ':' + \
+        #     str(self.ball_brick_vertical_collide(ball)) + '\n'
+        # ball.reverse_vx()
         return ball
 
     def collide(self, ball):
-
+        global debug
         if ball._dead:
-            print('1')
             return ball
 
         if self.ball_side_walls_collide(ball):
@@ -259,14 +280,15 @@ class Game:
             ball = self.ball_paddle_collide_handle(ball)
             return ball
 
-        # if ball.intersects(self._display):
-        #     return self.ball_brick_intersection(ball)
+        if ball.intersects(self._bricks):
+            ball = self.ball_brick_intersection(ball)
       
         index = self.ball_brick_horizontal_collide(ball)
         if index != -1:
+            debug += 'horizontal\n'
             ball.reverse_vx()
             self._player._score += \
-                self._bricks[index].get_damage_points(ball, self._player)
+                self._bricks[index].get_damage_points(self._player, ball)
             self._bricks[index].repaint_brick()
             return ball
 
@@ -274,7 +296,7 @@ class Game:
         if index != -1:
             ball.reverse_vy()
             self._player._score += \
-                self._bricks[index].get_damage_points(ball, self._player)
+                self._bricks[index].get_damage_points(self._player, ball)
             self._bricks[index].repaint_brick()
             return ball
 
@@ -294,16 +316,25 @@ class Game:
 
   
     def remove_bricks(self):
+        global debug 
         indices = []
+        powerups = []
+        poss = []
         for index, brick in enumerate(self._bricks):
             if brick._strength == 0:
                 indices.append(index)
+                pos = [brick._pos[0], brick._pos[1]]
+                poss.append(pos)
 
         indices.sort(reverse=True)
         for index in indices:
-            self._powerups[index]._state = 'FALL'
             del self._bricks[index]
 
+        for pos in poss:
+            powerup = Expand(self._height, self._width, pos, clock())
+            powerup._state = 'FALL'
+            powerups.append(powerup)
+        self._powerups = powerups
 
     def remove_powerups(self):
         indices = []
@@ -327,6 +358,7 @@ class Game:
         return ball
 
     def handle_keys(self):
+        global debug
         if self._keyboard.kbhit():
         
             key = self._keyboard.getch()
@@ -371,16 +403,17 @@ class Game:
                         ball = self.ball_paddle_collide_handle(ball)
                     new_balls.append(ball)    
                 self._balls = new_balls
-
             self._keyboard.flush()
        
 
     def reset_ball_paddle(self, ball):
+        global debug 
         ball._dead = True
         ball._pos = [self._height-2, self._width//2 - 1]
         self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
         self._player.lose_life()
         ball._velocity.setvx(0)
+        debug += 'reset\n'
         ball._velocity.setvy(0)
         return ball
 
@@ -394,7 +427,7 @@ class Game:
         powerups = []
         for powerup in self._powerups:
             if powerup._state == 'FALL':
-                # powerup.move()
+                powerup.move()
                 pass
             powerups.append(powerup)
         self._powerups = powerups
@@ -464,7 +497,7 @@ class Game:
             self._display.show()
             self._player.display_stats()
             self.wait(time) 
-    
-            for brick in self._bricks:
-                debug += str(brick._pos[0]) + str(brick._pos[1]) + ','
+            for ball in self._balls:
+                debug += str(ball._velocity.getvx()) + ','
             debug += '\n'
+ 
