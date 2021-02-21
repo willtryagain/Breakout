@@ -1,5 +1,6 @@
 import numpy as np
 from colorama import Fore, Back, Style
+from time import sleep
 
 class Display:
 
@@ -33,6 +34,20 @@ class Display:
         for i in range(self._height):
             for j in range(self._width):
                 self._canvas[i][j] = ' '
+
+    def alert(self, color, times=3):
+        cover = np.array([[color + ' ' for j in range(self._width)] for i in range(self._height)], dtype='object')
+
+        while times:
+            times -= 1
+            print(self.START)
+            for i in range(self._height):
+                for j in range(self._width):
+                    print(cover[i][j], end='')
+                print('')
+            sleep(0.1)
+            self.show()
+            sleep(0.2)
 
     def show(self):
         """

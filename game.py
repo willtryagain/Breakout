@@ -171,28 +171,27 @@ class Game:
                o
 
         """
+        top_ball = ball._pos[0]
+        bottom_ball = ball._pos[0] + ball._size[0]
+
+        left_ball = ball._pos[1]
+        right_ball = ball._pos[1] + ball._size[1]
+
         for index, brick in enumerate(self._bricks):
             left_brick = brick._pos[1]
-            right_brick = left_brick + brick._size[1] - 1
+            right_brick = left_brick + brick._size[1]
 
             top_brick = brick._pos[0]
-            bottom_brick = top_brick + brick._size[0] - 1
+            bottom_brick = top_brick + brick._size[0]
 
-            top_ball = ball._pos[0]
-            bottom_ball = ball._pos[0] + ball._size[0] - 1
-
-
-            left_ball = ball._pos[1]
-            right_ball = ball._pos[1] + ball._size[1] - 1
-      
-            in_between = (left_brick <= right_ball and right_ball <= right_brick)
+            in_between = (left_brick <= left_ball and right_ball <= right_brick)
 
             if in_between:
                 # above
-                if bottom_ball == top_brick - 1:
+                if bottom_ball == top_brick:
                     return index
                 # below
-                elif top_ball == bottom_brick + 1:
+                elif top_ball == bottom_brick:
                     return index
            
         return -1   
@@ -208,20 +207,21 @@ class Game:
             Right of brick
                 [|||||]    o
         """
+
+        top_ball = ball._pos[0]
+        bottom_ball = ball._pos[0] + ball._size[0]
+
+        left_ball = ball._pos[1]
+        right_ball = ball._pos[1] + ball._size[1]
+
         for index, brick in enumerate(self._bricks):
             left_brick = brick._pos[1]
-            right_brick = left_brick + brick._size[1] - 1
+            right_brick = left_brick + brick._size[1]
 
             top_brick = brick._pos[0]
-            bottom_brick = top_brick + brick._size[0] - 1
-
-            top_ball = ball._pos[0]
-            bottom_ball = ball._pos[0] + ball._size[0] - 1
-
-            left_ball = ball._pos[1]
-            right_ball = ball._pos[1] + ball._size[1] - 1
+            bottom_brick = top_brick + brick._size[0] 
       
-            in_between = (top_brick <= bottom_ball and bottom_ball <= bottom_brick)
+            in_between = (top_brick <= top_ball and bottom_ball <= bottom_brick)
 
             if in_between:
                 # left
@@ -233,10 +233,37 @@ class Game:
            
         return -1   
 
-    def lost_ball(self, ball):   
-        bottom_ball = ball._pos[0] + ball._size[0] - 1
-        bottom_display = self._height - 1
+    def ball_brick_corners_collide(self, ball):
+        top_ball = ball._pos[0]
+        bottom_ball = ball._pos[0] + ball._size[0]
 
+        left_ball = ball._pos[1]
+        right_ball = ball._pos[1] + ball._size[1]
+
+        for index, brick in enumerate(self._bricks):
+            left_brick = brick._pos[1]
+            right_brick = left_brick + brick._size[1]
+
+            top_brick = brick._pos[0]
+            bottom_brick = top_brick + brick._size[0]
+      
+            if bottom_ball == top_brick:
+                if (left_ball <= left_brick and left_brick <= right_ball) \
+                    or (left_ball <= right_brick and right_brick <= right_ball):
+                    return index
+            
+            if top_ball == bottom_brick:
+                if (left_ball <= left_brick and left_brick <= right_ball) \
+                    or (left_ball <= right_brick and right_brick <= right_ball):
+                    return index
+           
+        return -1   
+
+
+    def lost_ball(self, ball):   
+        bottom_ball = ball._pos[0] + ball._size[0]
+        bottom_display = self._height
+        
         return bottom_ball >= bottom_display
 
 
@@ -266,26 +293,32 @@ class Game:
             return ball
 
         if self.ball_side_walls_collide(ball):
-            print('2')
             ball.reverse_vy()
             return ball
 
         if self.ball_top_collide(ball):
-            print('3')
             ball.reverse_vx()
             return ball
         
         if self.ball_paddle_collide(ball):
-            print('4')
             ball = self.ball_paddle_collide_handle(ball)
             return ball
 
         if ball.intersects(self._bricks):
             ball = self.ball_brick_intersection(ball)
       
+        index = self.ball_brick_corners_collide(ball)
+        if index != -1:
+            debug += 'corners\n'
+            ball.reverse_vx()
+            self._player._score += \
+                self._bricks[index].get_damage_points(self._player, ball)
+            self._bricks[index].repaint_brick()
+            return ball
+
         index = self.ball_brick_horizontal_collide(ball)
         if index != -1:
-            debug += 'horizontal\n'
+            # debug += 'horizontal\n'
             ball.reverse_vx()
             self._player._score += \
                 self._bricks[index].get_damage_points(self._player, ball)
@@ -303,6 +336,7 @@ class Game:
         
         # fell down
         if self.lost_ball(ball):
+            self._display.alert(Back.RED)
             return self.reset_ball_paddle(ball)
 
         return ball
@@ -318,28 +352,24 @@ class Game:
     def remove_bricks(self):
         global debug 
         indices = []
-        powerups = []
-        poss = []
         for index, brick in enumerate(self._bricks):
             if brick._strength == 0:
                 indices.append(index)
                 pos = [brick._pos[0], brick._pos[1]]
-                poss.append(pos)
+                powerup = Expand(self._height, self._width, pos, clock())
+                powerup._state = 'FALL'
+                self._powerups.append(powerup)
 
         indices.sort(reverse=True)
         for index in indices:
             del self._bricks[index]
 
-        for pos in poss:
-            powerup = Expand(self._height, self._width, pos, clock())
-            powerup._state = 'FALL'
-            powerups.append(powerup)
-        self._powerups = powerups
-
     def remove_powerups(self):
+        global debug 
         indices = []
         for index, powerup in enumerate(self._powerups):
             if powerup._state == 'DELETE':
+                # debug += str(index) + '\n'
                 indices.append(index)
 
         indices.sort(reverse=True)
@@ -413,7 +443,7 @@ class Game:
         self._paddle._pos = [self._height-1, self._width//2 - self._paddle._size[1]]
         self._player.lose_life()
         ball._velocity.setvx(0)
-        debug += 'reset\n'
+        # debug += 'reset\n'
         ball._velocity.setvy(0)
         return ball
 
@@ -428,7 +458,6 @@ class Game:
         for powerup in self._powerups:
             if powerup._state == 'FALL':
                 powerup.move()
-                pass
             powerups.append(powerup)
         self._powerups = powerups
     def add_items(self):
@@ -479,6 +508,7 @@ class Game:
         global debug
         while True:
             time = clock()
+            
             self.handle_keys()
             if self.PAUSED:
                 self.wait(time)
@@ -487,17 +517,18 @@ class Game:
             
             self._balls = self.ball_collisions_handle()
             self.powerup_handle()
-            
-
-    
             self.remove_items()
-
             self._display.clrscr()
             self.add_items()
             self._display.show()
-            self._player.display_stats()
+            self._player.display_stats(self._paddle._size[1])
             self.wait(time) 
-            for ball in self._balls:
-                debug += str(ball._velocity.getvx()) + ','
+            
+            debug += str(self._balls[0]._pos[0]) + ':' +   str(self._balls[0]._pos[1]) + '\n'
+            index = len(self._bricks) - 1
+            debug += str(self._bricks[index]._pos[0]) + ':' +   str(self._bricks[index]._pos[1]) + '\n'
             debug += '\n'
- 
+
+            # if len(self._powerups):
+            #     debug += str(self._powerups[0]._pos[0]) 
+            #     debug += '\n'
