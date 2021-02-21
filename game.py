@@ -118,7 +118,7 @@ class Game:
         vy = ball._velocity.getvy()
 
         # distance from the middle
-        bias = abs(mid - ball._pos[1]) // 4
+        bias = abs(mid - ball._pos[1]) // 2
         
 
         vy = sign * abs(Powerup.inc_mag(vy, bias))
@@ -337,7 +337,7 @@ class Game:
         
         # fell down
         if self.lost_ball(ball):
-           
+            
             return self.reset_game(ball)
 
         return ball
@@ -350,8 +350,8 @@ class Game:
         return new_balls
 
     def get_powerup(self, pos):
-        type = choice(['expand', 'shrink', 'fastball', 'pgrab'])
-        type = choice(['fastball'])
+        type = choice(['expand', 'shrink', 'fastball', 'pgrab', 'thruball'])
+        type = choice(['multi'])
 
         if type == 'expand':
             powerup = Expand(self._height, self._width, pos, clock())
@@ -363,6 +363,8 @@ class Game:
             powerup = Multi(self._height, self._width, pos, clock())
         elif type == 'pgrab':
             powerup = Pgrab(self._height, self._width, pos, clock())   
+        elif type == 'thruball':
+            powerup = Thruball(self._height, self._width, pos, clock())      
         powerup._state = 'FALL'
         return powerup
 
@@ -512,18 +514,22 @@ class Game:
             self._paddle = powerup.magic(self._paddle, self._balls[0])
         elif powerup._kind == 'fastball':
             self._balls = powerup.magic(self._balls)
+        elif powerup._kind == 'thruball':
+            self._balls = powerup.magic(self._balls)
         else:
             self._paddle = powerup.magic(self._paddle)
 
     def powerup_reverse(self, powerup):
         if powerup._kind == 'multi':
-            self._balls = powerup.magic(self._balls)
+            self._balls = powerup.reverse(self._balls)
         elif powerup._kind == 'pgrab':
-            self._paddle = powerup.magic(self._paddle, self._balls[0])
+            self._paddle = powerup.reverse(self._paddle)
         elif powerup._kind == 'fastball':
             self._balls = powerup.reverse(self._balls)
+        elif powerup._kind == 'thruball':
+            self._balls = powerup.reverse(self._balls)
         else:
-            self._paddle = powerup.magic(self._paddle)
+            self._paddle = powerup.reverse(self._paddle)
 
     def powerup_handle(self):
         global debug
@@ -557,7 +563,9 @@ class Game:
         powerups = []
         for powerup in self._powerups:
             if powerup._state == 'ACTIVE':
+                self.powerup_reverse(powerup)
                 powerup._state = 'DELETE'
+
             powerups.append(powerup)
         return powerups
 
@@ -580,4 +588,4 @@ class Game:
             self._display.show()
             self._player.display_stats(self._paddle._size[1], self._balls[0])
             self.wait(time) 
-            debug += str(self._balls[0]._fast) + '\n'
+            debug += str(self._balls[0]._thru) + '\n'

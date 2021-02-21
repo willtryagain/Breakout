@@ -17,5 +17,6 @@ class Fastball(Powerup):
         return balls
 
     def reverse(self, balls):
+        self._state = 'DELETE'
         balls[0]._fast = False
         return balls

@@ -17,23 +17,23 @@ class Multi(Powerup):
     def magic(self, balls):
         split_balls = []
         for ball in balls:
-            vx = 1
+            vx = -1
             vy = 1
-            ball1 = Ball(self._gh, self._gw, ball._pos)
+            ball1 = Ball(self._gh, self._gw, [ball._pos[0], ball._pos[1]])
             ball1._velocity.setvx(vx)
             ball1._velocity.setvy(vy)
             ball._multi = False
-            ball1._alive = True
+            ball1._dead = False
 
-            ball2 = Ball(self._gh, self._gw, ball._pos)
-            ball2._velocity.setvx(-vx)
+            ball2 = Ball(self._gh, self._gw, [ball._pos[0], ball._pos[1]])
+            ball2._velocity.setvx(vx)
             ball2._velocity.setvy(-vy)
-            ball2._alive = True
-            ball._multi = True
+            ball._dead = False
             split_balls.extend((ball1, ball2))
    
         return split_balls
 
     def reverse(self, balls):
+        self._state = 'DELETE'
         # for ball in balls:
         pass

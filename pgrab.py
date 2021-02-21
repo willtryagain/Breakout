@@ -28,6 +28,7 @@ class Pgrab(Powerup):
         """
         deactivate the powerup
         """
+        self._state = 'DELETE'
         paddle._grab = False
         paddle._rel = 0
         return paddle
