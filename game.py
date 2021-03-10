@@ -50,7 +50,7 @@ class Game:
         y0 = self._width // 2
         h = 1
         w = 5
-        level = y0//19
+        level = y0//25
 
         # for i in range(level):
         #     for j in range(-i, i+1):
@@ -77,93 +77,16 @@ class Game:
 
         return bricks
 
- 
-    
-    
-
-    
-    def ball_brick_corners_collide(self, ball):
-        top_ball = ball._pos[0]
-        bottom_ball = ball._pos[0] + ball._size[0]
-
-        left_ball = ball._pos[1]
-        right_ball = ball._pos[1] + ball._size[1]
-
-        for index, brick in enumerate(self._bricks):
-            left_brick = brick._pos[1]
-            right_brick = left_brick + brick._size[1]
-
-            top_brick = brick._pos[0]
-            bottom_brick = top_brick + brick._size[0]
-      
-            if bottom_ball == top_brick:
-                if (left_ball <= left_brick and left_brick <= right_ball) \
-                    or (left_ball <= right_brick and right_brick <= right_ball):
-                    return index
-            
-            if top_ball == bottom_brick:
-                if (left_ball <= left_brick and left_brick <= right_ball) \
-                    or (left_ball <= right_brick and right_brick <= right_ball):
-                    return index
-           
-        return -1   
-
-    def lost_ball(self, ball):   
-        bottom_ball = ball._pos[0] + ball._size[0]
-        bottom_display = self._height 
-        
-        return bottom_ball >= bottom_display
-
-    def ball_brick_intersection(self, ball):
-        global debug
-        vx = ball._velocity.getvx()
-        vy = ball._velocity.getvy()
-        while ball.intersects(self._bricks):
-            if vx < 0: 
-                ball.down() 
-            else:
-                ball.up()
-
-            if vy < 0:
-                ball.right()
-            else:
-                ball.left()
-        # debug += str(self.ball_brick_horizontal_collide(ball)) + ':' + \
-        #     str(self.ball_brick_vertical_collide(ball)) + '\n'
-        # ball.reverse_vx()
-        return ball
-
-    def collide(self, ball):
-        global debug
-        if ball._dead:
-            return ball
-
-        if ball.side_walls_collide():
-            ball.reverse_vy()
-            return ball
-
-        if ball.top_collide():
-            ball.reverse_vx()
-            return ball
-        
-        if ball.paddle_collide(self._paddle):
-            if self._paddle._grab:
-                ball._velocity.setvx(0)
-                ball._velocity.setvy(0)
-            else:
-                ball.reverse_vx()
-                ball.paddle_collide_handle(self._paddle)
-            return ball
-
+    def non_trivial_collision(self, ball):
         if ball.intersects(self._bricks):
-            ball = self.ball_brick_intersection(ball)
-      
-        index = self.ball_brick_corners_collide(ball)
+            ball.brick_intersection(self._bricks)
+        
+        index = ball.brick_corners_collide(self._bricks)
         if index != -1:
             # debug += 'corners\n'
             ball.reverse_vx()
             self._player._score += \
-                self._bricks[index].get_damage_points(self._player, ball)
+                self._bricks[index].get_damage_points(ball)
             self._bricks[index].repaint_brick()
             return ball
 
@@ -172,7 +95,7 @@ class Game:
             # debug += 'horizontal\n'
             ball.reverse_vx()
             self._player._score += \
-                self._bricks[index].get_damage_points(self._player, ball)
+                self._bricks[index].get_damage_points(ball)
             self._bricks[index].repaint_brick()
             return ball
 
@@ -180,17 +103,18 @@ class Game:
         if index != -1:
             ball.reverse_vy()
             self._player._score += \
-                self._bricks[index].get_damage_points(self._player, ball)
+                self._bricks[index].get_damage_points(ball)
             self._bricks[index].repaint_brick()
             return ball
 
         return ball
-         
+        
     def ball_collisions_handle(self):
         new_balls = []
         for ball in self._balls:
-            ball = self.collide(ball)
-            if self.lost_ball(ball):
+            if not ball.trivial_collision(self._paddle):
+                ball = self.non_trivial_collision(ball)
+            if ball.lost():
                 ball =  self.reset_game(ball)
                 new_balls = [ball]
                 break
@@ -198,7 +122,7 @@ class Game:
         return new_balls
 
     def get_powerup(self, pos):
-        type = choice(['expand', 'shrink', 'fastball', 'pgrab', 'thruball'])
+        type = choice(['expand', 'shrink', 'pgrab', 'thruball']) # 'fastball'
         # type = choice(['multi'])
 
         if type == 'expand':
@@ -417,6 +341,13 @@ class Game:
             powerups.append(powerup)
         return powerups
 
+    def level_up(self):
+        if not self._bricks: 
+            self._bricks = self.get_brick_pattern()
+            self._player._level += 1
+        if self._player._level == 3:
+            raise SystemExit
+
     def mainloop(self):
         global debug
         while True:
@@ -425,7 +356,7 @@ class Game:
             if self.PAUSED:
                 self.wait(time)
                 continue
-            
+            self.level_up()
             self.move_items()
             
             self._balls = self.ball_collisions_handle()

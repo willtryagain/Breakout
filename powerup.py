@@ -72,3 +72,5 @@ class Powerup(Meta):
         mag = abs(x)+ bias
         mag = min(mag, settings.MAX_SPEED)
         return sign * mag 
+
+        

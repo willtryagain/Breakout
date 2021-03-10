@@ -9,6 +9,7 @@ class Player:
         self._score = score
         self._start = clock()
         self._score = score
+        self._level = 1
 
     def lose_life(self):
         self._lives -= 1
@@ -26,4 +27,5 @@ class Player:
         print('BALLS:', str(self._lives).rjust(1), end='\t')
         print('TIME:', str(time_passed).rjust(5), end='\t')
         print('PADDLE:', str(length).rjust(3), end='\t')
-        print('SPEED', str(speed).rjust(3))
+        print('BALL SPEED', str(speed).rjust(3), end='\t')
+        print('LEVEL', str(self._level).rjust(3))

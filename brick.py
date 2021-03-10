@@ -29,7 +29,7 @@ class Brick(Meta):
         elif self._strength == 0:
             self.draw(Back.BLUE)
 
-    def get_damage_points(self, player, ball=None):
+    def get_damage_points(self, ball=None):
         """
 
         """
@@ -55,3 +55,5 @@ class Brick(Meta):
 
     def draw(self, color, len=5):
         self._ascii = [color + ' '] * len
+
+    

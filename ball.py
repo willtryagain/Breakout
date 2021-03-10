@@ -38,8 +38,6 @@ class Ball(Meta):
                 self._pos[1] -= 1
             return
 
-
-
         # increment by the velocities
         self._pos[0] += self._velocity.vx
         self._pos[1] += self._velocity.vy
@@ -254,14 +252,14 @@ class Ball(Meta):
            
         return -1   
 
-     def brick_corners_collide(self, bricks):
+    def brick_corners_collide(self, bricks):
         top_ball = self._pos[0]
         bottom_ball = self._pos[0] + self._size[0]
 
         left_ball = self._pos[1]
         right_ball = self._pos[1] + self._size[1]
 
-        for index, brick in enumerate(self._bricks):
+        for index, brick in enumerate(bricks):
             left_brick = brick._pos[1]
             right_brick = left_brick + brick._size[1]
 
@@ -279,3 +277,53 @@ class Ball(Meta):
                     return index
            
         return -1   
+
+    def lost(self):   
+        bottom_ball = self._pos[0] + self._size[0]
+        bottom_display = self._gh 
+        
+        return bottom_ball >= bottom_display
+
+    def brick_intersection(self, bricks):
+        vx = self._velocity.getvx()
+        vy = self._velocity.getvy()
+        while self.intersects(bricks):
+            if vx < 0: 
+                self.down() 
+            else:
+                self.up()
+
+            if vy < 0:
+                self.right()
+            else:
+                self.left()
+        # debug += str(self.ball_brick_horizontal_collide(ball)) + ':' + \
+        #     str(self.ball_brick_vertical_collide(ball)) + '\n'
+        # ball.reverse_vx()
+
+    def trivial_collision(self, paddle):
+        if self._dead:
+            return True
+
+        if self._velocity.getvx() == 0:
+            self._velocity.setvx(-1)
+
+        if self.side_walls_collide():
+            self.reverse_vy()
+            return True
+
+        if self.top_collide():
+            self.reverse_vx()
+            return True
+
+        if self.paddle_collide(paddle):
+            if paddle._grab:
+                self._velocity.setvx(0)
+                self._velocity.setvy(0)
+            else:
+                self.reverse_vx()
+                self.paddle_collide_handle(paddle)
+            return True
+
+        return False
+     
