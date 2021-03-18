@@ -10,6 +10,7 @@ from paddle import Paddle
 from brick import Brick
 from player import Player
 from laser import Laser
+from boss import Boss
 
 from powerup import Powerup
 from expand import Expand
@@ -43,6 +44,7 @@ class Game:
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
         self._bricks = self.get_brick_pattern(1)
+        self._boss = Boss(self._height, self._width)
         self.fhit = None
         self._powerups = [] # self.add_powerups()
         self._player = Player()
@@ -70,7 +72,7 @@ class Game:
                 brick.repaint()
                 bricks.append(brick)
 
-        if level == 2:
+        elif level == 2:
             for i in range(x0 + 5, x0 + 8):
                 brick = Brick(self._height, self._width, pos=[i, y0 - breadth])
                 brick._strength = choice([1, 2, 3])
@@ -82,9 +84,15 @@ class Game:
                 brick.repaint()
                 bricks.append(brick)
 
+        elif level == 3:
+            self._boss.awake = True
+
         # unbreakable and possible
-        bricks[0]._strength = 'INFINITY'
-        bricks[0].repaint()
+        brick = Brick(self._height, self._width, pos=[14, self._width//2])
+        brick._strength = 'INFINITY'
+        brick.repaint()
+        bricks.append(brick)
+        
         brick = Brick(self._height, self._width, pos=[15, self._width//2])
         brick._rainbow = True
         brick.repaint()
@@ -374,6 +382,10 @@ class Game:
             debug += 'pos: ' + ' '.join(map(str, laser.get_pos())) + '\n'
             debug += 'tail: ' + ' '.join(map(str, laser.get_tail())) + '\n'
             self._display.put(laser)
+        
+        if self._boss.awake:
+            self._display.put(self._boss)
+
 
 
     def powerup_magic(self, powerup):
