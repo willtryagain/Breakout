@@ -40,9 +40,10 @@ class Game:
         ])]
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
-        self._bricks = self.get_brick_pattern(0)
+        self._bricks = self.get_brick_pattern(1)
         self._powerups = [] # self.add_powerups()
         self._player = Player()
+        global debug
 
     def get_brick_pattern(self, level):
         """
@@ -54,20 +55,39 @@ class Game:
         h = 1
         w = 5
         margin = 2
+        breadth = y0//4
 
-        for j in range(-margin-settings.BRICK_LENGTH, margin+settings.BRICK_LENGTH + 1):
-            if y0 + j*w >= self._width \
-                or y0 + j*w < 0:
-                continue
-            brick = Brick(self._height, self._width, pos=[x0 + level*h, y0 + j*w])
-            brick._strength = choice([1, 2, 3])
-            brick.repaint()
-            bricks.append(brick)
+        if level == 1:
+            for j in range(-margin-settings.BRICK_LENGTH, margin+settings.BRICK_LENGTH + 1):
+                if y0 + j*w >= self._width \
+                    or y0 + j*w < 0:
+                    continue
+                brick = Brick(self._height, self._width, pos=[x0 + level*h, y0 + j*w])
+                brick._strength = choice([1, 2, 3])
+                brick.repaint()
+                bricks.append(brick)
 
+        if level == 2:
+            for i in range(x0 + 10, x0 + 15):
+                brick = Brick(self._height, self._width, pos=[i, y0 - breadth])
+                brick._strength = choice([1, 2, 3])
+                brick.repaint()
+                bricks.append(brick)
+
+                brick = Brick(self._height, self._width, pos=[i, y0 + breadth])
+                brick._strength = choice([1, 2, 3])
+                brick.repaint()
+                bricks.append(brick)
+
+        # unbreakable and possible
         bricks[0]._strength = 'INFINITY'
         bricks[0].repaint()
-        bricks[-1]._rainbow = True
-        bricks[-1].repaint()
+        brick = Brick(self._height, self._width, pos=[15, self._width//2])
+        brick._rainbow = True
+        brick.repaint()
+        bricks.append(brick)
+
+
 
 
         # for i in range(level-1, -1, -1):
@@ -92,7 +112,7 @@ class Game:
             # debug += 'corners\n'
             self._bricks[index]._velocity = ball._velocity
             self._bricks[index]._rainbow = False
-            ball.reverse_vx()
+            ball._velocity.reversevx()
             self._player._score += \
                 self._bricks[index].get_damage_points(ball)
             self._bricks[index].repaint()
@@ -103,7 +123,7 @@ class Game:
             self._bricks[index]._velocity = ball._velocity
             self._bricks[index]._rainbow = False
             # debug += 'horizontal\n'
-            ball.reverse_vx()
+            ball._velocity.reversevx()
             self._player._score += \
                 self._bricks[index].get_damage_points(ball)
             self._bricks[index].repaint()
@@ -113,7 +133,7 @@ class Game:
         if index != -1:
             self._bricks[index]._velocity = ball._velocity
             self._bricks[index]._rainbow = False
-            ball.reverse_vy()
+            ball._velocity.reversevy()
             self._player._score += \
                 self._bricks[index].get_damage_points(ball)
             self._bricks[index].repaint()
@@ -141,8 +161,8 @@ class Game:
     def get_powerup(self, pos, type=None):
         if type == None:
         # randomly choose from the various types of powerups
-            type = choice(['expand', 'shrink', 'pgrab', 'thruball', 'fastball']) # 
-            type = choice(['gunpaddle'])
+            type = choice(['expand', 'shrink', 'pgrab', 'thruball', 'fastball', 'gunpaddle']) # 
+            # type = choice([])
 
 
         if type == 'expand':
@@ -167,21 +187,17 @@ class Game:
         indices = []
         # find indices of bricks to be deleted
         # and place a powerup in their place
-        last_pos = None
         for index, brick in enumerate(self._bricks):
             if brick._strength == 0:
                 indices.append(index)
                 pos = [brick._pos[0], brick._pos[1]]
-                last_pos = pos[:]
-                powerup = self.get_powerup(pos)
+                debug += 'pos ' + ' '.join(map(str, pos)) + '\n'
+                if pos[1] ==  self._width//2:
+                    powerup = self.get_powerup(pos, 'thruball')
+                else:
+                    powerup = self.get_powerup(pos)
                 powerup._velocity = Velocity(brick._velocity.getvx(), brick._velocity.getvy())
                 self._powerups.append(powerup)
-        
-        # debug += str(self._powerups) + ' \n'
-        # if len(self._powerups):
-        #     if last_pos == None:
-        #         raise ValueError('last p')
-        #     self._powerups[-1] = self.get_powerup(last_pos, 'thruball')     
 
         # delete the bricks
         indices.sort(reverse=True)
@@ -263,8 +279,8 @@ class Game:
                 self._balls = new_balls
             
             elif key == 'l':
-                self._bricks = self.get_brick_pattern(self._player._level)
                 self._player._level += 1
+                self._bricks = self.get_brick_pattern(self._player._level)
                 self._powerups = self.deactivate()
             
             self._keyboard.flush()
@@ -360,8 +376,9 @@ class Game:
         powerups = []
         for powerup in self._powerups:
             if powerup._state == 'FALL':
-                if powerup.collision(self._paddle):
-                    self.powerup_magic(powerup)
+                if not powerup.trivial_collision():
+                    if powerup.paddle_collision(self._paddle):
+                        self.powerup_magic(powerup)
                     # debug += 'magic\n'
                 
             elif powerup._state == 'ACTIVE':

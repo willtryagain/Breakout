@@ -60,16 +60,10 @@ class Ball(Meta):
         ).reshape(1, -1)
 
 
-    def reverse_vy(self):
-        vy = self._velocity.getvy()
-        self._velocity.setvy(-vy)
 
     def set_posy(self, pos):
         self._pos[1] = pos
 
-    def reverse_vx(self):
-        vx = self._velocity.getvx()
-        self._velocity.setvx(-vx)
 
     def intersects(self, bricks):
         left_ball = self._pos[1]
@@ -147,36 +141,6 @@ class Ball(Meta):
         self._velocity.setvx(vx) 
         self._velocity.setvy(vy)
 
-    def side_walls_collide(self):
-        """
-        check if ball collided with the side walls 
-        """
-        left_ball = self._pos[1]
-        right_ball = self._pos[1] + self._size[1] - 1
-
-        left_wall = 0
-        right_wall = self._gw - 1
-
-        # hits the side walls
-        if left_ball == left_wall or right_wall == right_ball:
-            return True
-        
-        return False
-
-
-    def top_collide(self):
-        """
-        check if ball collided with the top wall
-        """
-        top_ball = self._pos[0]
-        top_wall = 0
-
-        if top_ball == top_wall:
-            return True
-
-        return False
-
-    
     def brick_horizontal_collide(self, bricks):
         """
             handle collision with brick 
@@ -311,11 +275,11 @@ class Ball(Meta):
             self._velocity.setvx(-1)
 
         if self.side_walls_collide():
-            self.reverse_vy()
+            self._velocity.reversevy()
             return True
 
         if self.top_collide():
-            self.reverse_vx()
+            self._velocity.reversevx()
             return True
 
         if self.paddle_collide(paddle):
@@ -325,7 +289,7 @@ class Ball(Meta):
 
             else:
                 if self._velocity.getvx() > 0:
-                    self.reverse_vx()
+                    self._velocity.reversevx()
                 self.paddle_collide_handle(paddle)
 
 

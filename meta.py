@@ -34,3 +34,31 @@ class Meta:
         """
         """
         pass
+
+    def side_walls_collide(self):
+        """
+        check if object collided with the side walls 
+        """
+        left_ball = self._pos[1]
+        right_ball = self._pos[1] + self._size[1] - 1
+
+        left_wall = 0
+        right_wall = self._gw - 1
+
+        # hits the side walls
+        if left_ball == left_wall or right_wall == right_ball:
+            return True
+        
+        return False
+
+    def top_collide(self):
+        """
+        check if ball collided with the top wall
+        """
+        top_ball = self._pos[0]
+        top_wall = 0
+
+        if top_ball == top_wall:
+            return True
+
+        return False

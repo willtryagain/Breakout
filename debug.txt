@@ -1,1 +1,29 @@
 fall
+pos 17 65
+pos 9 60
+58 48 10
+fall
+pos 11 55
+76 66 10
+fall
+pos 12 75
+70 60 10
+fall
+70 60 10
+fall
+70 60 10
+fall
+pos 15 65
+70 60 10
+fall
+70 60 10
+fall
+70 60 10
+fall
+pos 18 70
+82 72 10
+fall
+pos 20 80
+pos 26 40
+fall
+pos 28 85

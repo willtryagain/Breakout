@@ -15,3 +15,8 @@ class Velocity:
     def setvy(self, vy):
         self.vy = vy
 
+    def reversevx(self):
+        self.vx = -self.vx
+
+    def reversevy(self):
+        self.vy = -self.vy

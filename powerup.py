@@ -31,8 +31,8 @@ class Powerup(Meta):
         vx = self._velocity.getvx()
         if self._pos[0] + vx <= self._gh - 1:
             # increment by the velocities
-            self._pos[0] += self._velocity.vx
-            self._pos[1] += self._velocity.vy
+            self._pos[0] += self._velocity.getvx()
+            self._pos[1] += self._velocity.getvy()
             
             # non-negative
             self._pos[0] = max(self._pos[0], 0)
@@ -46,9 +46,17 @@ class Powerup(Meta):
             # it can't be used anymore
             self._state = 'DELETE'
         
- 
-    
-    def collision(self, paddle):
+    def trivial_collision(self):
+        if self.side_walls_collide():
+            self._velocity.reversevy()
+            return True
+
+        if self.top_collide():
+            self._velocity.reversevx()
+            return True
+        return False
+
+    def paddle_collision(self, paddle):
         """
         return true if collision 
         has taken place with the paddle
