@@ -35,12 +35,12 @@ class Paddle(Meta):
                 # upper bound
                 self._pos[1] = self._gw - self._size[1]
 
-    def draw(self, len=20, color=Back.YELLOW):
+    def draw(self, len=20, color=Back.YELLOW, start='(', stop=')'):
 
         return np.array(
-            [Fore.WHITE + '('] 
+            [Fore.WHITE + start] 
             + [color + ' ']*len 
-            + [Fore.WHITE + ')'],
+            + [Fore.WHITE + stop],
             dtype='object'
         ).reshape(1, -1)
 

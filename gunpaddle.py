@@ -1,27 +1,27 @@
-import numpy as np
 from colorama import Fore, Back, Style
+import numpy as np
 
 from powerup import Powerup
 import settings
 
-class Pgrab(Powerup):
+class Gunpaddle(Powerup):
     """
-    Grab the paddle.
+    The paddle will now shoot bullets.
     """
     def __init__(self, game_height, game_width, pos, start_time):
         super().__init__(game_height, game_width, pos, start_time)
         self._ascii = np.array(
-        [Back.BLUE + 'P', 
-        Back.BLUE + 'G'], 
+        [Back.MAGENTA + 'G', 
+        Back.MAGENTA + 'P'], 
         dtype='object').reshape(1, -1)
-        self._kind = 'pgrab'
 
-    def magic(self, paddle, ball):
+    def magic(self, paddle):
         """
-        grab the paddle
+        change the paddle
         """
-        paddle._grab = True
-        paddle._rel = ball._pos[1] - paddle._pos[1] 
+        paddle._ascii = paddle.draw(start='^', stop='^')
+
+
         return paddle
 
     def reverse(self, paddle):
@@ -29,6 +29,5 @@ class Pgrab(Powerup):
         deactivate the powerup
         """
         self._state = 'DELETE'
-        paddle._grab = False
-        paddle._rel = False
+        # paddle.update(-settings.EXPAND_VAL)
         return paddle

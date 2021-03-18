@@ -8,7 +8,7 @@ import settings
 
 class Powerup(Meta):
     """
-    Powerup has four states
+    Powerup has three states
     i. HIDE: Hidden inside the brick
     ii. FALL: The brick has been destroyed. Powerup falls down
     iii. ACTIVE: The powerup has been activated
@@ -17,7 +17,7 @@ class Powerup(Meta):
     def __init__(self, game_height, game_width,  pos, start_time):
         self._state = 'HIDE'
         self._ascii = np.array(
-            [Back.MAGENTA + '<', 
+            [Back.MAGENTA + Fore.WHITE +  '<', 
             Back.MAGENTA + '>'], 
             dtype='object').reshape(1, -1)
         self._start_time = start_time
@@ -30,7 +30,17 @@ class Powerup(Meta):
 
         vx = self._velocity.getvx()
         if self._pos[0] + vx <= self._gh - 1:
-            self._pos[0] +=  vx
+            # increment by the velocities
+            self._pos[0] += self._velocity.vx
+            self._pos[1] += self._velocity.vy
+            
+            # non-negative
+            self._pos[0] = max(self._pos[0], 0)
+            self._pos[1] = max(self._pos[1], 0)
+            
+            # upper bound
+            self._pos[0] = min(self._pos[0], self._gh - self._size[0])
+            self._pos[1] = min(self._pos[1], self._gw - self._size[1])
         else:
             # the powerup fell down
             # it can't be used anymore

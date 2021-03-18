@@ -1,7 +1,9 @@
 import numpy as np
 from colorama import Fore, Back, Style
+import random
 
 from meta import Meta
+from velocity import Velocity
 
 class Brick(Meta):
 
@@ -15,9 +17,14 @@ class Brick(Meta):
             Back.RED + ' ',
         ], dtype='object').reshape(1, -1)
         self._strength = strength
+        self._rainbow = False
+        self._velocity = Velocity()
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
-    def repaint_brick(self):
+    def repaint(self):
+        if self._rainbow:
+            self._strength = random.choice([1, 2, 3])
+
         if self._strength == 'INFINITY':
            self.draw(Back.CYAN) 
         elif self._strength == 3:
@@ -46,7 +53,6 @@ class Brick(Meta):
             return 3
 
         elif self._strength == 1:
-            
             return 2
 
         elif self._strength == 0:
@@ -56,4 +62,6 @@ class Brick(Meta):
     def draw(self, color, len=5):
         self._ascii = [color + ' '] * len
 
-    
+    def move(self):
+        self._pos[0] += 1
+        self._pos[0] = min(self._pos[0], self._gh - self._size[0])

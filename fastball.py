@@ -14,6 +14,7 @@ class Fastball(Powerup):
 
     def magic(self, balls):
         balls[0]._fast = True
+        balls[0].go_fast()
         return balls
 
     def reverse(self, balls):

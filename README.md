@@ -16,6 +16,8 @@ This is a CLI game written in Python3, inspired by the original **Breakout**. Th
 - <kbd>SPACE</kbd>: move the ball if lost a life
 - <kbd>P</kbd>: pause / unpause
 - <kbd>Q</kbd>: quit
+- <kbd>L</kbd>: level up
+
 
 
 

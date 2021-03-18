@@ -5,6 +5,8 @@ import settings
 from meta import Meta
 from velocity import Velocity
 from powerup import Powerup
+
+
 class Ball(Meta):
     def __init__(self, game_height, game_width, pos):
         self._ascii = self.draw()
@@ -320,10 +322,24 @@ class Ball(Meta):
             if paddle._grab:
                 self._velocity.setvx(0)
                 self._velocity.setvy(0)
+
             else:
-                self.reverse_vx()
+                if self._velocity.getvx() > 0:
+                    self.reverse_vx()
                 self.paddle_collide_handle(paddle)
+
+
             return True
 
         return False
+
+    def paddle_centre(self, paddle, rel=None):
+        left_paddle = paddle._pos[1]
+        right_paddle = paddle._pos[1] +  paddle._size[1] - 1
+        mid = (left_paddle + right_paddle) // 2
+        # debug += str(rel) + '\n'
+        if rel:
+            y = left_paddle + rel
+            self.set_posy(y)
+        self.set_posy(mid)
      
