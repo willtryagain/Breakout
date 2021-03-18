@@ -9,7 +9,12 @@ from powerup import Powerup
 
 class Ball(Meta):
     def __init__(self, game_height, game_width, pos):
-        self._ascii = self.draw()
+        self._ascii = np.array([
+            Style.BRIGHT + Fore.RED + '(', 
+            Style.BRIGHT + Fore.RED + ')'],
+            dtype='object'
+        ).reshape(1, -1)
+
         self._dead = True
         self._thru = False
         self._fast = False

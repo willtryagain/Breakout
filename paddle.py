@@ -11,6 +11,7 @@ class Paddle(Meta):
         self._velocity = Velocity(0, 0)
         self._grab = False
         self._rel = 0
+        self._gun = False
         super().__init__(game_height, game_width, [game_height-1,\
             game_width//2 - self._ascii.shape[1]], [1, 22], self._ascii)
 

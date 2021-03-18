@@ -9,6 +9,7 @@ from ball import Ball
 from paddle import Paddle
 from brick import Brick
 from player import Player
+from laser import Laser
 
 from powerup import Powerup
 from expand import Expand
@@ -38,6 +39,7 @@ class Game:
             self._height - 2, 
             (2*self._paddle._pos[1] + self._paddle._size[1]) // 2
         ])]
+        self._lasers = []
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
         self._bricks = self.get_brick_pattern(1)
@@ -68,7 +70,7 @@ class Game:
                 bricks.append(brick)
 
         if level == 2:
-            for i in range(x0 + 10, x0 + 15):
+            for i in range(x0 + 5, x0 + 8):
                 brick = Brick(self._height, self._width, pos=[i, y0 - breadth])
                 brick._strength = choice([1, 2, 3])
                 brick.repaint()
@@ -162,7 +164,7 @@ class Game:
         if type == None:
         # randomly choose from the various types of powerups
             type = choice(['expand', 'shrink', 'pgrab', 'thruball', 'fastball', 'gunpaddle']) # 
-            # type = choice([])
+            type = choice(['gunpaddle'])
 
 
         if type == 'expand':
@@ -216,10 +218,20 @@ class Game:
         for index in indices:
             del self._powerups[index]
 
+    def remove_lasers(self):
+        indices = []
+        for index, laser in enumerate(self._lasers):
+            if laser.top_collide():
+                indices.append(index)
+
+        indices.sort(reverse=True)
+        for index in indices:
+            del self._lasers[index]
+
     def remove_items(self):
         self.remove_bricks()
         self.remove_powerups()
-
+        self.remove_lasers()
     
 
     def handle_keys(self):
@@ -282,6 +294,13 @@ class Game:
                 self._player._level += 1
                 self._bricks = self.get_brick_pattern(self._player._level)
                 self._powerups = self.deactivate()
+
+            elif key == 'f':
+                if self._paddle._gun:
+                    pos = self._paddle._pos
+                    len = self._paddle._size[1]
+                    laser = Laser(self._height, self._width, [pos[0]-1, pos[1]], len)
+                    self._lasers.append(laser)
             
             self._keyboard.flush()
 
@@ -320,6 +339,9 @@ class Game:
             powerups.append(powerup)
         self._powerups = powerups
 
+        for laser in self._lasers:
+            laser.move()
+
         if clock() - self._last_time > settings.FALL_TIME:
             self.bricks_fall = True
         else:
@@ -327,7 +349,7 @@ class Game:
         
 
     def add_items(self):
-
+        global debug
         # add balls to the screen
         for ball in self._balls:
             self._display.put(ball)
@@ -343,6 +365,12 @@ class Game:
         for powerup in self._powerups:
             if powerup._state == 'FALL':
                 self._display.put(powerup)
+
+        for laser in self._lasers:
+            debug += 'pos: ' + ' '.join(map(str, laser.get_pos())) + '\n'
+            debug += 'tail: ' + ' '.join(map(str, laser.get_tail())) + '\n'
+            self._display.put(laser)
+
 
     def powerup_magic(self, powerup):
         """
@@ -362,7 +390,8 @@ class Game:
     def powerup_reverse(self, powerup):
         if powerup._kind == 'multi':
             self._balls = powerup.reverse(self._balls)
-        elif powerup._kind == 'pgrab':
+        elif powerup._kind == 'pgrab' or \
+            powerup._kind == 'gunpaddle':
             self._paddle = powerup.reverse(self._paddle)
         elif powerup._kind == 'fastball':
             self._balls = powerup.reverse(self._balls)
@@ -386,6 +415,26 @@ class Game:
                     self.powerup_reverse(powerup)
             powerups.append(powerup)
         self._powerups = powerups
+
+    def laser_handle(self):
+        for laser in self._lasers:
+            index = laser.brick_corners_collide(self._bricks)
+            if index != -1:
+                # debug += 'corners\n'
+                self._bricks[index]._velocity = laser._velocity
+                self._bricks[index]._rainbow = False
+                self._player._score += \
+                    self._bricks[index].get_damage_points(laser)
+                self._bricks[index].repaint()
+                continue
+
+            index = laser.brick_vertical_collide(self._bricks)
+            if index != -1:
+                self._bricks[index]._velocity = laser._velocity
+                self._bricks[index]._rainbow = False
+                self._player._score += \
+                    self._bricks[index].get_damage_points(laser)
+                self._bricks[index].repaint()
 
     def wait(self, time):
         while clock() - time < 0.1:
@@ -435,6 +484,7 @@ class Game:
             
             self._balls = self.ball_collisions_handle()
             self.powerup_handle()
+            self.laser_handle()
             self.remove_items()
             self._display.clrscr()
             self.add_items()

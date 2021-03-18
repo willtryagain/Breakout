@@ -20,7 +20,7 @@ class Gunpaddle(Powerup):
         change the paddle
         """
         paddle._ascii = paddle.draw(start='^', stop='^')
-
+        paddle._gun = True
 
         return paddle
 
@@ -28,6 +28,8 @@ class Gunpaddle(Powerup):
         """
         deactivate the powerup
         """
+        paddle._ascii = paddle.draw()
+        paddle._gun = False
         self._state = 'DELETE'
         # paddle.update(-settings.EXPAND_VAL)
         return paddle
