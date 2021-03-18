@@ -43,6 +43,7 @@ class Game:
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
         self._bricks = self.get_brick_pattern(1)
+        self.fhit = None
         self._powerups = [] # self.add_powerups()
         self._player = Player()
         global debug
@@ -297,10 +298,13 @@ class Game:
 
             elif key == 'f':
                 if self._paddle._gun:
-                    pos = self._paddle._pos
-                    len = self._paddle._size[1]
-                    laser = Laser(self._height, self._width, [pos[0]-1, pos[1]], len)
-                    self._lasers.append(laser)
+                    if not self.fhit or \
+                        clock() - self.fhit >= settings.FIRE_TIME:
+                        self.fhit = clock()
+                        pos = self._paddle._pos
+                        len = self._paddle._size[1]
+                        laser = Laser(self._height, self._width, [pos[0]-1, pos[1]], len)
+                        self._lasers.append(laser)
             
             self._keyboard.flush()
 
@@ -470,6 +474,16 @@ class Game:
             if brick._pos[0] == self._height - 1:
                 self.end_game()
 
+    def get_laser_stime(self):
+        stimes = []
+        for powerup in self._powerups:
+            if powerup._kind == 'gunpaddle' and \
+                powerup._state == 'ACTIVE': 
+                stimes.append(powerup._start_time)
+        if stimes:
+            return max(stimes)
+                
+
     def mainloop(self):
         global debug
         while True:
@@ -489,5 +503,5 @@ class Game:
             self._display.clrscr()
             self.add_items()
             self._display.show()
-            self._player.display_stats(self._paddle._size[1], self._balls[0])
+            self._player.display_stats(self._paddle._size[1], self._balls[0], self.get_laser_stime())
             self.wait(time) 

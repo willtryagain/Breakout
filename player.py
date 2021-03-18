@@ -1,4 +1,5 @@
 import numpy as np
+import settings
 
 from time import monotonic as clock
 from colorama import Fore, Back, Style
@@ -15,10 +16,12 @@ class Player:
         self._lives -= 1
         
 
-    def display_stats(self, length, ball):
+    def display_stats(self, length, ball, stime):
         vx = ball._velocity.getvx()
         vy = ball._velocity.getvy()
-        
+        rtime = None
+        if stime:
+            rtime = int(settings.POWERUP_TIME - (clock() - stime))
         time_passed = int(clock() - self._start)
         speed = int(np.sqrt(vx**2 + vy**2))
         print(Style.RESET_ALL + Style.BRIGHT, end='')
@@ -29,3 +32,5 @@ class Player:
         print('PADDLE:', str(length).rjust(3), end='\t')
         print('BALL SPEED', str(speed).rjust(3), end='\t')
         print('LEVEL', str(self._level).rjust(3))
+        if rtime:
+            print('\nREM TIME:', str(rtime).rjust(3))

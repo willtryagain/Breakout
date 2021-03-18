@@ -14,6 +14,7 @@ class Gunpaddle(Powerup):
         [Back.MAGENTA + 'G', 
         Back.MAGENTA + 'P'], 
         dtype='object').reshape(1, -1)
+        self._kind = 'gunpaddle'
 
     def magic(self, paddle):
         """
