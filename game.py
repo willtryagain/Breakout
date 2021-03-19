@@ -55,7 +55,7 @@ class Game:
         Get the pattern of bricks
         """
         bricks = []
-        x0 = settings.BRICK_START_ROW
+        x0 = settings.BRICK_START_ROW 
         y0 = self._width // 2
         h = 1
         w = 5
@@ -88,12 +88,12 @@ class Game:
             self._boss.awake = True
 
         # unbreakable and possible
-        brick = Brick(self._height, self._width, pos=[14, self._width//2])
+        brick = Brick(self._height, self._width, pos=[10, self._width//2])
         brick._strength = 'INFINITY'
         brick.repaint()
         bricks.append(brick)
 
-        brick = Brick(self._height, self._width, pos=[15, self._width//2])
+        brick = Brick(self._height, self._width, pos=[11, self._width//2])
         brick._rainbow = True
         brick.repaint()
         bricks.append(brick)
@@ -183,7 +183,7 @@ class Game:
         if type == None:
         # randomly choose from the various types of powerups
             type = choice(['expand', 'shrink', 'pgrab', 'thruball', 'fastball', 'gunpaddle']) # 
-            type = choice(['gunpaddle'])
+            # type = choice(['gunpaddle'])
 
 
         if type == 'expand':
@@ -217,7 +217,7 @@ class Game:
                     powerup = self.get_powerup(pos, 'thruball')
                 else:
                     powerup = self.get_powerup(pos)
-                powerup._velocity = Velocity(brick._velocity.getvx(), brick._velocity.getvy())
+                powerup._velocity = Velocity(brick._velocity.getvx(), brick._velocity.getvy(), settings.GRAVITY)
                 self._powerups.append(powerup)
 
         # delete the bricks
@@ -229,7 +229,7 @@ class Game:
         global debug 
         indices = []
         for index, powerup in enumerate(self._powerups):
-            if powerup._state == 'DELETE':
+            if powerup.lost():
                 # debug += str(index) + '\n'
                 indices.append(index)
 
@@ -455,7 +455,7 @@ class Game:
 
     def laser_handle(self):
         for laser in self._lasers:
-            index = laser.brick_corners_collide(self._bricks)
+            index = laser.brick_collide(self._bricks)
             if index != -1:
                 # debug += 'corners\n'
                 self._bricks[index]._velocity = Velocity(laser._velocity.getvx(), laser._velocity.getvy()) 
@@ -463,16 +463,6 @@ class Game:
                 self._player._score += \
                     self._bricks[index].get_damage_points(laser)
                 self._bricks[index].repaint()
-                continue
-
-            index = laser.brick_vertical_collide(self._bricks)
-            if index != -1:
-                self._bricks[index]._velocity = Velocity(laser._velocity.getvx(), laser._velocity.getvy())
-                self._bricks[index]._rainbow = False
-                self._player._score += \
-                    self._bricks[index].get_damage_points(laser)
-                self._bricks[index].repaint()
-
 
     def wait(self, time):
         while clock() - time < 0.1:
@@ -497,15 +487,17 @@ class Game:
 
     def level_up(self):
         if not self._bricks:
-            self._bricks = self.get_brick_pattern(self._player._level)
             self._player._level += 1
+            self._bricks = self.get_brick_pattern(self._player._level)
             self._powerups = self.deactivate()
 
     def check_end_game(self):
+        global debug
         if self._player._level == 4:
             raise SystemExit
         for brick in self._bricks:
             if brick._pos[0] == self._height - 1:
+                debug += 'brick end' + '\n'
                 self.end_game()
 
     def get_laser_stime(self):
@@ -526,10 +518,10 @@ class Game:
             if self.PAUSED:
                 self.wait(time)
                 continue
-            self.check_end_game()
             self.level_up()
             self._boss.add_bomb()
             self.move_items()
+            self.check_end_game()
 
             self._balls = self.ball_collisions_handle()
             self._balls = self.bomb_collisions_handle()

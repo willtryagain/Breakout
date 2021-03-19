@@ -1,7 +1,8 @@
 class Velocity:
-    def __init__(self, vx=0, vy=0):
+    def __init__(self, vx=0, vy=0, gravity=0):
         self.vx = vx
         self.vy = vy
+        self.gravity = gravity
 
     def getvx(self):
         return self.vx

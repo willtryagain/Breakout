@@ -45,7 +45,7 @@ class Ball(Meta):
                 self._pos[1] -= 1
             return
 
-        # increment by the velocities
+        # increment the pos
         self._pos[0] += self._velocity.vx
         self._pos[1] += self._velocity.vy
         
@@ -111,7 +111,8 @@ class Ball(Meta):
         right_ball = self._pos[1] + self._size[1]
 
         # ball is just above paddle
-        if height_ball == height_paddle - 1:
+        if height_ball == height_paddle - 1 or \
+            height_ball == height_paddle:
             if left_paddle <= left_ball and right_ball <= right_paddle:
                 return True
     

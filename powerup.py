@@ -23,28 +23,27 @@ class Powerup(Meta):
         self._start_time = start_time
         self._kind = ''
        
-        self._velocity = Velocity(vx = settings.POWERUP_SPEED)
+        self._velocity = Velocity(gravity=settings.GRAVITY)
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
     def move(self, paddle=None):
 
         vx = self._velocity.getvx()
-        if self._pos[0] + vx <= self._gh - 1:
-            # increment by the velocities
-            self._pos[0] += self._velocity.getvx()
-            self._pos[1] += self._velocity.getvy()
-            
-            # non-negative
-            self._pos[0] = max(self._pos[0], 0)
-            self._pos[1] = max(self._pos[1], 0)
-            
-            # upper bound
-            self._pos[0] = min(self._pos[0], self._gh - self._size[0])
-            self._pos[1] = min(self._pos[1], self._gw - self._size[1])
-        else:
-            # the powerup fell down
-            # it can't be used anymore
-            self._state = 'DELETE'
+       
+        self._velocity.setvx(vx + self._velocity.gravity)
+
+        # increment by the velocities
+        self._pos[0] += self._velocity.getvx()
+        self._pos[1] += self._velocity.getvy()
+        
+        # non-negative
+        self._pos[0] = max(self._pos[0], 0)
+        self._pos[1] = max(self._pos[1], 0)
+        
+        # upper bound
+        self._pos[0] = min(self._pos[0], self._gh - self._size[0])
+        self._pos[1] = min(self._pos[1], self._gw - self._size[1])
+      
         
     def trivial_collision(self):
         if self.side_walls_collide():
@@ -68,7 +67,8 @@ class Powerup(Meta):
         left_powerup = self._pos[1]
         right_powerup = self._pos[1] + self._size[1] - 1
         bottom_powerup = self._pos[0] + self._size[0] - 1
-        if bottom_powerup == top_paddle - 1:
+        if bottom_powerup == top_paddle or \
+            bottom_powerup == top_paddle + 1:
             if left_paddle <= left_powerup and right_powerup <= right_paddle:
                 self._state = 'ACTIVE'
                 self._start_time = clock()

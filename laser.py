@@ -28,3 +28,32 @@ class Laser(Ball):
         
         # non-negative
         self._pos[0] = max(self._pos[0], 0)
+
+    def brick_collide(self, bricks):
+
+        top_ball = self._pos[0]
+        bottom_ball = self._pos[0] + self._size[0]
+
+        left_ball = self._pos[1]
+        right_ball = self._pos[1] + self._size[1]
+
+        for index, brick in enumerate(bricks):
+            left_brick = brick._pos[1]
+            right_brick = left_brick + brick._size[1]
+
+            top_brick = brick._pos[0]
+            bottom_brick = top_brick + brick._size[0]
+
+            in_between = (left_brick <= left_ball and right_ball <= right_brick)
+
+            if in_between:
+                # above
+                if bottom_ball == top_brick or \
+                    bottom_ball == top_brick + 1:
+                    return index
+                # below
+                elif top_ball == bottom_brick or \
+                    top_ball == bottom_brick - 1:
+                    return index
+           
+        return -1   

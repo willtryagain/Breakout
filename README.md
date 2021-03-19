@@ -14,9 +14,11 @@ This is a CLI game written in Python3, inspired by the original **Breakout**. Th
 - <kbd>D</kbd>: move the paddle right
 
 - <kbd>SPACE</kbd>: move the ball if lost a life
+- <kbd>F</kbd>: fire laser
 - <kbd>P</kbd>: pause / unpause
 - <kbd>Q</kbd>: quit
 - <kbd>L</kbd>: level up
+
 
 
 
@@ -36,6 +38,16 @@ The `Paddle` class is responsible for movement and appearance of paddle. It inhe
 
 ### Brick 
 The `Brick` class is responsible for strength and color of bricks.
+<ul>
+<li> Color: CYAN
+Strength: ∞
+<li> Color: RED
+Strength: 3
+<li> Color: GREEN
+Strength: 2
+<li> Color: MAGENTA
+Strength: 1
+</ul>
 
 ### Ball 
 The `Ball` class handles the movement of the ball. It also has a function called go_fast which is invoked when the fastball powerup is activated.

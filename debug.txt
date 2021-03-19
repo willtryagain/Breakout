@@ -1,6 +1,3 @@
 fall
-pos 16 61
-fall
-pos 5 36
-pos 12 61
-pos 13 86
+pos 14 46
+pos 15 51
