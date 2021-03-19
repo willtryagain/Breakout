@@ -19,6 +19,7 @@ class Brick(Meta):
         self._strength = strength
         self._rainbow = False
         self._velocity = Velocity()
+        self._shield = False
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
     def repaint(self):

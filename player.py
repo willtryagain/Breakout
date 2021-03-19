@@ -1,11 +1,12 @@
 import numpy as np
-import settings
-
 from time import monotonic as clock
 from colorama import Fore, Back, Style
 
+import settings
+import res
+
 class Player:
-    def __init__(self, lives=3, score=0):
+    def __init__(self, lives=settings.MAX_LIVES, score=0):
         self._lives = lives
         self._score = score
         self._start = clock()
@@ -14,14 +15,14 @@ class Player:
 
     def lose_life(self):
         self._lives -= 1
-        
 
-    def display_stats(self, length, ball, stime):
+    def display_stats(self, length, ball, stime, boss):
         vx = ball._velocity.getvx()
         vy = ball._velocity.getvy()
         rtime = None
-        print('REM TIME:', str(stime).rjust(3))
-
+        health = None
+        if boss.awake:
+            health = boss._health
         if stime:
             rtime = int(settings.POWERUP_TIME - (clock() - stime))
             rtime = settings.POWERUP_TIME - (clock() - stime)
@@ -37,4 +38,6 @@ class Player:
         # print('BALL SPEED', str(speed).rjust(3), end='\t')
         print('LEVEL', str(self._level).rjust(3))
         if rtime:
-            print('REM TIME:', str(rtime).rjust(3))
+            print('REM TIME:', str(rtime).rjust(3), end='\t')
+        if health:
+            print('BOSS HEALTH:', res.get_health_bar(10, health, settings.BOSS_HEALTH))

@@ -309,3 +309,18 @@ class Ball(Meta):
             self.set_posy(y)
         self.set_posy(mid)
      
+    def boss_collide(self, boss):
+        top_boss = boss._pos[0]
+        bottom_boss = boss._pos[0] + boss._size[0]
+
+        left_boss = boss._pos[1]
+        right_boss = boss._pos[1] + boss._size[1]
+
+        left_ball = self._pos[1]
+        top_ball = self._pos[0]
+
+        if left_boss <= left_ball and left_ball + 1 <= right_boss:
+            if top_boss <= top_ball and top_ball + 1 <= bottom_boss:
+                return True
+
+        return False

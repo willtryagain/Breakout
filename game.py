@@ -98,8 +98,15 @@ class Game:
         brick.repaint()
         bricks.append(brick)
 
+        brick = Brick(self._height, self._width, pos=[10, self._width//2 + brick._size[1]])
+        brick._rainbow = True
+        brick.repaint()
+        bricks.append(brick)
 
-
+        brick = Brick(self._height, self._width, pos=[11, self._width//2 + brick._size[1]])
+        brick._strength = 'INFINITY'
+        brick.repaint()
+        bricks.append(brick)
 
         # for i in range(level-1, -1, -1):
         #     for j in range(-i, i+1):
@@ -115,13 +122,15 @@ class Game:
         collision which make changes to not only ball
         but bricks, player's score as well
         """
+        global debug 
         if ball.intersects(self._bricks):
             ball.brick_intersection(self._bricks)
         
         index = ball.brick_corners_collide(self._bricks)
         if index != -1:
-            # debug += 'corners\n'
+            debug += '{},{}\n'.format(ball._velocity.getvx(), ball._velocity.getvy())
             self._bricks[index]._velocity = Velocity(ball._velocity.getvx(), ball._velocity.getvy()) 
+            
             self._bricks[index]._rainbow = False
             ball._velocity.reversevx()
             self._player._score += \
@@ -150,6 +159,11 @@ class Game:
             self._bricks[index].repaint()
             return ball
 
+        if ball.boss_collide(self._boss):
+            ball._velocity.reversevx()
+            ball._velocity.reversevy()
+            self._boss._health -= settings.BOSS_DAMAGE
+            self._boss._health = max(self._boss._health, 0)    
         return ball
         
     def ball_collisions_handle(self):
@@ -218,7 +232,8 @@ class Game:
                 else:
                     powerup = self.get_powerup(pos)
                 powerup._velocity = Velocity(brick._velocity.getvx(), brick._velocity.getvy(), settings.GRAVITY)
-                self._powerups.append(powerup)
+                if not brick._shield:
+                    self._powerups.append(powerup)
 
         # delete the bricks
         indices.sort(reverse=True)
@@ -298,7 +313,7 @@ class Game:
                 new_balls = []
                 for ball in self._balls:
                     if ball._velocity.getvx() == 0:
-                        ball._velocity.setvx(1)
+                        ball._velocity.setvx(2)
                     if  ball.paddle_collide(self._paddle):
                         if self._paddle._grab:
                             self._paddle._rel = ball._pos[1] - self._paddle._pos[1] 
@@ -383,6 +398,14 @@ class Game:
 
     def add_items(self):
         global debug
+        # if self._boss.awake:
+        #     self._boss.add_shield(self._bricks)
+        #     self._boss.add_bomb()
+        #     self._display.put(self._boss)
+        #     for bomb in self._boss._bombs:
+        #         self._display.put(bomb)
+
+
         # add balls to the screen
         for ball in self._balls:
             self._display.put(ball)
@@ -404,10 +427,7 @@ class Game:
             debug += 'tail: ' + ' '.join(map(str, laser.get_tail())) + '\n'
             self._display.put(laser)
         
-        if self._boss.awake:
-            self._display.put(self._boss)
-            for bomb in self._boss._bombs:
-                self._display.put(bomb)
+        
 
     def powerup_magic(self, powerup):
         """
@@ -488,7 +508,7 @@ class Game:
     def level_up(self):
         if not self._bricks:
             self._player._level += 1
-            self._bricks = self.get_brick_pattern(self._player._level)
+            self._bricks = []#self.get_brick_pattern(self._player._level)
             self._powerups = self.deactivate()
 
     def check_end_game(self):
@@ -522,7 +542,6 @@ class Game:
                 self.wait(time)
                 continue
             self.level_up()
-            self._boss.add_bomb()
             self.move_items()
             self.check_end_game()
 
@@ -535,5 +554,5 @@ class Game:
             self._display.clrscr()
             self.add_items()
             self._display.show()
-            self._player.display_stats(self._paddle._size[1], self._balls[0], self.get_laser_stime())
+            self._player.display_stats(self._paddle._size[1], self._balls[0], self.get_laser_stime(), self._boss)
             self.wait(time) 
