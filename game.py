@@ -252,7 +252,7 @@ class Game:
         global debug 
         indices = []
         for index, powerup in enumerate(self._powerups):
-            if powerup.lost():
+            if powerup.lost() and powerup._state != 'ACTIVE':
                 # debug += str(index) + '\n'
                 indices.append(index)
 
@@ -393,10 +393,10 @@ class Game:
         for laser in self._lasers:
             laser.move()
 
-        # if clock() - self._last_time > settings.FALL_TIME:
-        #     self.bricks_fall = True
-        # else:
-        #     self.bricks_fall = False
+        if clock() - self._last_time > settings.FALL_TIME:
+            self.bricks_fall = True
+        else:
+            self.bricks_fall = False
 
         if self._boss.awake:
             new_bombs = []
@@ -407,12 +407,12 @@ class Game:
 
     def add_items(self):
         global debug
-        # if self._boss.awake:
-        #     self._boss.add_shield(self._bricks)
-        #     self._boss.add_bomb()
-        #     self._display.put(self._boss)
-        #     for bomb in self._boss._bombs:
-        #         self._display.put(bomb)
+        if self._boss.awake:
+            self._boss.add_shield(self._bricks)
+            self._boss.add_bomb()
+            self._display.put(self._boss)
+            for bomb in self._boss._bombs:
+                self._display.put(bomb)
 
 
         # add balls to the screen
@@ -479,7 +479,7 @@ class Game:
             elif powerup._state == 'ACTIVE':
                 if powerup.time_up():
                     self.powerup_reverse(powerup)
-                debug += '{} {}\n'.format(powerup._state, powerup._kind)
+
             powerups.append(powerup)
         self._powerups = powerups
 
@@ -523,11 +523,14 @@ class Game:
 
     def check_end_game(self):
         global debug
+        if self._boss._health == 0:
+            self._display.alert(Fore.GREEN, 'won.txt')
+            self.wait(clock())
+            self.end_game()
         if self._player._level == 4:
             raise SystemExit
         for brick in self._bricks:
             if brick._pos[0] == self._height - 1:
-                debug += 'brick end' + '\n'
                 self.end_game()
 
     def get_laser_stime(self):

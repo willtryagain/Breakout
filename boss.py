@@ -12,8 +12,8 @@ class Boss(Meta):
     def __init__(self, game_height, game_width, paddle):
         self._ascii = np.array([
             [' ', ' ', ' ', ' ', Fore.BLUE + '.', Fore.BLUE + '-', Fore.BLUE + '-', Fore.BLUE + '-', Fore.BLUE + '.', ' ', ' ', ' '],
-            [' ', ' ', Fore.BLUE + '_', Fore.BLUE + '/', Fore.BLUE + '_', Fore.BLUE + '_', Style.BRIGHT + Fore.GREEN + '~', Style.BRIGHT + Fore.GREEN + '0', Fore.BLUE + '_', Fore.BLUE + '\\', Fore.BLUE + '_', ' '], 
-            [' ', Fore.WHITE + '(', Fore.WHITE + '_', Fore.WHITE + '_', Fore.WHITE + '_', Fore.WHITE + '_', Fore.WHITE + '_', Fore.WHITE + '_', Fore.WHITE + '_', Fore.WHITE + '_', Back.YELLOW + Fore.BLUE + '_', Fore.BLUE + ')' + Style.RESET_ALL]], dtype='object'
+            [' ', ' ', Fore.BLUE + '_', Fore.BLUE + '/', Fore.BLUE + '_', Fore.BLUE + '_',Style.BRIGHT + Fore.GREEN + '~', Style.BRIGHT + Fore.GREEN + '0', Fore.BLUE + '_', Fore.BLUE + '\\', Fore.BLUE + '_', ' '], 
+            [' ',  Fore.BLUE + '(', Fore.BLUE +  '_',  Fore.BLUE + '_', Fore.BLUE + '_', Fore.BLUE + '_', Fore.BLUE + '_', Fore.BLUE + '_', Fore.BLUE + '_', Fore.BLUE + '_', Fore.BLUE + '_', Fore.BLUE + ')' + Style.RESET_ALL]], dtype='object'
         )
 
         self._velocity = Velocity(0, 0)

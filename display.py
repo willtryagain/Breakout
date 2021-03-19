@@ -46,8 +46,8 @@ class Display:
             for j in range(self._width):
                 self._canvas[i][j] = ' '
 
-    def alert(self, color=Fore.RED):
-        rip = self.get_text()
+    def alert(self, color=Fore.RED, path='rip.txt'):
+        rip = self.get_text(path)
         if rip is None:
            return
         print(self.START)
@@ -58,6 +58,7 @@ class Display:
             print('')
         sleep(2)
         print(Style.RESET_ALL + self.ERASE + self.START + '\n')
+
     def show(self):
         """
         Show the canvas on the terminal
