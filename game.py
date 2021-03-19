@@ -125,9 +125,12 @@ class Game:
         global debug 
         if ball.intersects(self._bricks):
             ball.brick_intersection(self._bricks)
+            debug += 'intersects\n'
         
         index = ball.brick_corners_collide(self._bricks)
         if index != -1:
+            debug += 'corner\n'
+
             debug += '{},{}\n'.format(ball._velocity.getvx(), ball._velocity.getvy())
             self._bricks[index]._velocity = Velocity(ball._velocity.getvx(), ball._velocity.getvy()) 
             
@@ -159,7 +162,7 @@ class Game:
             self._bricks[index].repaint()
             return ball
 
-        if ball.boss_collide(self._boss):
+        if self._boss.awake and ball.boss_collide(self._boss):
             ball._velocity.reversevx()
             ball._velocity.reversevy()
             self._boss._health -= settings.BOSS_DAMAGE
@@ -167,6 +170,7 @@ class Game:
         return ball
         
     def ball_collisions_handle(self):
+        global debug
         new_balls = []
         for ball in self._balls:
             if ball.paddle_collide(self._paddle):
@@ -176,6 +180,10 @@ class Game:
                     self._last_time = clock()
             if not ball.trivial_collision(self._paddle):
                 ball = self.non_trivial_collision(ball)
+                debug += 'non \n'
+            else:
+                debug += 't \n'
+
             if ball.lost():
                 ball =  self.reset_game(ball)
                 new_balls = [ball]
@@ -197,7 +205,7 @@ class Game:
         if type == None:
         # randomly choose from the various types of powerups
             type = choice(['expand', 'shrink', 'pgrab', 'thruball', 'fastball', 'gunpaddle']) # 
-            type = choice(['gunpaddle'])
+            type = choice(['expand'])
 
 
         if type == 'expand':
@@ -384,10 +392,10 @@ class Game:
         for laser in self._lasers:
             laser.move()
 
-        if clock() - self._last_time > settings.FALL_TIME:
-            self.bricks_fall = True
-        else:
-            self.bricks_fall = False
+        # if clock() - self._last_time > settings.FALL_TIME:
+        #     self.bricks_fall = True
+        # else:
+        #     self.bricks_fall = False
 
         if self._boss.awake:
             new_bombs = []
@@ -470,6 +478,7 @@ class Game:
             elif powerup._state == 'ACTIVE':
                 if powerup.time_up():
                     self.powerup_reverse(powerup)
+                debug += '{} {}\n'.format(powerup._state, powerup._kind)
             powerups.append(powerup)
         self._powerups = powerups
 
@@ -508,7 +517,7 @@ class Game:
     def level_up(self):
         if not self._bricks:
             self._player._level += 1
-            self._bricks = []#self.get_brick_pattern(self._player._level)
+            self._bricks = self.get_brick_pattern(self._player._level)
             self._powerups = self.deactivate()
 
     def check_end_game(self):

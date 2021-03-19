@@ -34,7 +34,7 @@ class Player:
         print('SCORE:', str(self._score).rjust(1), end='\t')
         print('BALLS:', str(self._lives).rjust(1), end='\t')
         print('TIME:', str(time_passed).rjust(5), end='\t')
-        # print('PADDLE:', str(length).rjust(3), end='\t')
+        print('PADDLE:', str(length).rjust(3), end='\t')
         # print('BALL SPEED', str(speed).rjust(3), end='\t')
         print('LEVEL', str(self._level).rjust(3))
         if rtime:
