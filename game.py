@@ -92,7 +92,7 @@ class Game:
         brick._strength = 'INFINITY'
         brick.repaint()
         bricks.append(brick)
-        
+
         brick = Brick(self._height, self._width, pos=[15, self._width//2])
         brick._rainbow = True
         brick.repaint()
@@ -169,6 +169,16 @@ class Game:
             new_balls.append(ball)
         return new_balls
 
+    def bomb_collisions_handle(self):
+        ball = None
+        for bomb in self._boss._bombs:
+            if bomb.paddle_collision(self._paddle):
+                ball = self.reset_game(self._balls[0])
+                break
+        if ball:
+            return [ball]
+        return self._balls
+
     def get_powerup(self, pos, type=None):
         if type == None:
         # randomly choose from the various types of powerups
@@ -241,6 +251,7 @@ class Game:
         self.remove_bricks()
         self.remove_powerups()
         self.remove_lasers()
+        self._boss.remove_bombs()
     
 
     def handle_keys(self):
@@ -262,10 +273,14 @@ class Game:
                 new_balls = []
                 for ball in self._balls:
                     self._paddle.move(key)
+                    if self._boss.awake:
+                        self._boss.move(key)
                     if  ball._dead or (self._paddle._grab and ball._velocity.getvx() == 0):
                         ball.paddle_centre(self._paddle)
                     new_balls.append(ball)
                 self._balls = new_balls
+
+
             
             # Ball left / right
             elif key == 'w' or key == 's':
@@ -358,7 +373,13 @@ class Game:
             self.bricks_fall = True
         else:
             self.bricks_fall = False
-        
+
+        if self._boss.awake:
+            new_bombs = []
+            for bomb in self._boss._bombs:
+                bomb.move()
+                new_bombs.append(bomb)
+            self._boss._bombs = new_bombs
 
     def add_items(self):
         global debug
@@ -385,8 +406,8 @@ class Game:
         
         if self._boss.awake:
             self._display.put(self._boss)
-
-
+            for bomb in self._boss._bombs:
+                self._display.put(bomb)
 
     def powerup_magic(self, powerup):
         """
@@ -452,6 +473,7 @@ class Game:
                     self._bricks[index].get_damage_points(laser)
                 self._bricks[index].repaint()
 
+
     def wait(self, time):
         while clock() - time < 0.1:
             pass
@@ -506,9 +528,12 @@ class Game:
                 continue
             self.check_end_game()
             self.level_up()
+            self._boss.add_bomb()
             self.move_items()
-            
+
             self._balls = self.ball_collisions_handle()
+            self._balls = self.bomb_collisions_handle()
+
             self.powerup_handle()
             self.laser_handle()
             self.remove_items()
