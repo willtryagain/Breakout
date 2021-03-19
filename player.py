@@ -34,7 +34,7 @@ class Player:
         print('TIME:', str(time_passed).rjust(3), end='\t')
         print('PADDLE:', str(length).rjust(2), end='\t')
         # print('BALL SPEED', str(speed).rjust(3), end='\t')
-        print('LEVEL', str(self._level).rjust(1), end='\t')
+        print('LEVEL', str(self._level).rjust(3), end='\t')
         if stime:
             rtime = int(settings.POWERUP_TIME - (clock() - stime))
         if rtime:

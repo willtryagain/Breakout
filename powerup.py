@@ -29,8 +29,11 @@ class Powerup(Meta):
     def move(self, paddle=None):
 
         vx = self._velocity.getvx()
-       
-        self._velocity.setvx(vx + self._velocity.gravity)
+        if vx * self._velocity.gravity >= 0:
+            vx += self._velocity.gravity
+        vx = min(vx, settings.MAX_SPEED)
+
+        self._velocity.setvx(vx)
 
         # increment by the velocities
         self._pos[0] += self._velocity.getvx()

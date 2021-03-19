@@ -309,7 +309,7 @@ class Ball(Meta):
             self.set_posy(y)
         self.set_posy(mid)
      
-    def boss_collide(self, boss):
+    def boss_intersect(self, boss):
         top_boss = boss._pos[0]
         bottom_boss = boss._pos[0] + boss._size[0]
 
@@ -323,4 +323,30 @@ class Ball(Meta):
             if top_boss <= top_ball and top_ball + 1 <= bottom_boss:
                 return True
 
+        return False
+
+    def boss_intersection(self, boss):
+        vx = self._velocity.getvx()
+        vy = self._velocity.getvy()
+        if self.boss_intersect(boss):
+            self._pos[0] = boss._pos[0] + boss._size[0]
+            self._pos[1] = (2*boss._pos[1] + boss._size[1])//2
+
+    def boss_collide(self, boss):
+        left_boss = boss._pos[1]
+        right_boss = boss._pos[1] + boss._size[1]
+        flag = ''
+        bottom_boss = boss._pos[0] +  boss._size[0]
+
+        if self._pos[0] < bottom_boss:
+            if self._pos[1] == left_boss - 1:
+                self._velocity.reversevy()
+                return True
+            elif self._pos[1] == right_boss:
+                self._velocity.reversevy()
+                return True
+        elif self._pos[0] == bottom_boss:
+            if left_boss <= self._pos[1] and self._pos[1] + self._size[1] <= right_boss:
+                self._velocity.reversevx()
+                return True
         return False

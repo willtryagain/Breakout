@@ -73,16 +73,25 @@ class Game:
                 bricks.append(brick)
 
         elif level == 2:
-            for i in range(x0 + 5, x0 + 8):
+            for i in range(0, x0 + 5):
                 brick = Brick(self._height, self._width, pos=[i, y0 - breadth])
                 brick._strength = choice([1, 2, 3])
                 brick.repaint()
                 bricks.append(brick)
 
-                brick = Brick(self._height, self._width, pos=[i, y0 + breadth])
+                brick = Brick(self._height, self._width, pos=[i, y0 + breadth + 4])
                 brick._strength = choice([1, 2, 3])
                 brick.repaint()
                 bricks.append(brick)
+
+            # for j in range(-y0//25-settings.BRICK_LENGTH, y0//25+settings.BRICK_LENGTH + 1):
+            #     if y0 + j*w >= self._width \
+            #         or y0 + j*w < 0:
+            #         continue
+            #     brick = Brick(self._height, self._width, pos=[x0 + y0//25*h, y0 + j*w])
+            #     brick._strength = choice([1, 2, 3])# , 'INFINITY'])
+            #     brick.repaint()
+            #     bricks.append(brick)    
 
         elif level == 3:
             self._boss.awake = True
@@ -125,8 +134,9 @@ class Game:
         global debug 
         if ball.intersects(self._bricks):
             ball.brick_intersection(self._bricks)
-            debug += 'intersects\n'
-        
+            debug += 'intersects br\n'
+         
+
         index = ball.brick_corners_collide(self._bricks)
         if index != -1:
             debug += 'corner\n'
@@ -145,7 +155,7 @@ class Game:
         if index != -1:
             self._bricks[index]._velocity = Velocity(ball._velocity.getvx(), ball._velocity.getvy()) 
             self._bricks[index]._rainbow = False
-            # debug += 'horizontal\n'
+            debug += 'horizontal\n'
             ball._velocity.reversevx()
             self._player._score += \
                 self._bricks[index].get_damage_points(ball)
@@ -154,6 +164,7 @@ class Game:
 
         index = ball.brick_vertical_collide(self._bricks)
         if index != -1:
+            debug += 'brick_vertical_collide\n'
             self._bricks[index]._velocity = Velocity(ball._velocity.getvx(), ball._velocity.getvy()) 
             self._bricks[index]._rainbow = False
             ball._velocity.reversevy()
@@ -162,11 +173,15 @@ class Game:
             self._bricks[index].repaint()
             return ball
 
-        if self._boss.awake and ball.boss_collide(self._boss):
-            ball._velocity.reversevx()
-            ball._velocity.reversevy()
-            self._boss._health -= settings.BOSS_DAMAGE
-            self._boss._health = max(self._boss._health, 0)    
+        if self._boss.awake:
+            if ball.boss_intersect(self._boss):
+                debug += 'intersects boss\n'
+                ball.boss_intersection(self._boss)
+            res = ball.boss_collide(self._boss)
+            if res:
+                debug += 'boss collide\n'
+                self._boss._health -= settings.BOSS_DAMAGE
+                self._boss._health = max(self._boss._health, 0)    
         return ball
         
     def ball_collisions_handle(self):
@@ -205,7 +220,7 @@ class Game:
         if type == None:
         # randomly choose from the various types of powerups
             type = choice(['expand', 'shrink', 'pgrab', 'thruball', 'fastball', 'gunpaddle']) # 
-            type = choice(['gunpaddle', 'expand'])
+            # type = choice(['fastball'])
 
 
         if type == 'expand':
@@ -528,7 +543,7 @@ class Game:
             self.wait(clock())
             self.end_game()
         if self._player._level == 4:
-            raise SystemExit
+            self.end_game()
         for brick in self._bricks:
             if brick._pos[0] >= self._height - 2:
                 self.end_game()

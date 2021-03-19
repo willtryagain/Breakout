@@ -1,6 +1,7 @@
 import numpy as np
 from colorama import Fore, Back, Style
 from time import monotonic as clock, sleep
+from random import random, choice, randint
 
 from velocity import Velocity 
 from meta import Meta
@@ -67,8 +68,8 @@ class Boss(Meta):
         bricks = []
         x = self._pos[0] + self._size[0] + 2
         y = 0
-        while y + 5 <= self._gw - settings.RIGHT_MARGIN:
-            brick = Brick(self._gh, self._gw, [x, y], 1)
+        while y + 5 <= self._gw:
+            brick = Brick(self._gh, self._gw, [x, y], choice([1, 2, 3]))
             brick.repaint()
             brick._shield = True
             y += brick._size[1]
@@ -76,7 +77,7 @@ class Boss(Meta):
         return bricks
 
     def add_shield(self, bricks):
-        if self._health <= 0.25 * settings.BOSS_HEALTH:
+        if self._health <= 0.75 * settings.BOSS_HEALTH:
             if self._shield_count:
                 for brick in bricks:
                     if brick._shield:
