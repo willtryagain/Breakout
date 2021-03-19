@@ -30,12 +30,15 @@ class Laser(Ball):
         self._pos[0] = max(self._pos[0], 0)
 
     def brick_collide(self, bricks):
+        """
+        get indices of bricks we collided
+        """
+        indices = []
+        left_laser = self._pos[1]
+        right_laser = self._pos[1] + self._size[1] - 1
 
-        top_ball = self._pos[0]
-        bottom_ball = self._pos[0] + self._size[0]
-
-        left_ball = self._pos[1]
-        right_ball = self._pos[1] + self._size[1]
+        top_laser = self._pos[0]
+        bottom_laser = self._pos[0] + self._size[0]
 
         for index, brick in enumerate(bricks):
             left_brick = brick._pos[1]
@@ -44,16 +47,24 @@ class Laser(Ball):
             top_brick = brick._pos[0]
             bottom_brick = top_brick + brick._size[0]
 
-            in_between = (left_brick <= left_ball and right_ball <= right_brick)
-
-            if in_between:
+            if left_brick <= left_laser and left_laser + 1 <= right_brick:
                 # above
-                if bottom_ball == top_brick or \
-                    bottom_ball == top_brick + 1:
-                    return index
+                if bottom_laser == top_brick or \
+                    bottom_laser == top_brick + 1:
+                    indices.append(index)
                 # below
-                elif top_ball == bottom_brick or \
-                    top_ball == bottom_brick - 1:
-                    return index
+                elif top_laser == bottom_brick or \
+                    top_laser == bottom_brick - 1:
+                    indices.append(index)
+
+            if left_brick <= right_laser and right_laser + 1 <= right_brick:
+                # above
+                if bottom_laser == top_brick or \
+                    bottom_laser == top_brick + 1:
+                    indices.append(index)
+                # below
+                elif top_laser == bottom_brick or \
+                    top_laser == bottom_brick - 1:
+                    indices.append(index)        
            
-        return -1   
+        return indices   

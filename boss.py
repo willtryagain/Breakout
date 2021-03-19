@@ -8,7 +8,7 @@ import settings
 from bomb import Bomb
 
 class Boss(Meta):
-    def __init__(self, game_height, game_width):
+    def __init__(self, game_height, game_width, paddle):
         self._ascii = np.array([
             [' ', ' ', ' ', ' ', Fore.WHITE + '.', Fore.WHITE + '-', Fore.WHITE + '-', Fore.WHITE + '-', Fore.WHITE + '.', ' ', ' ', ' '],
             [' ', ' ', Fore.WHITE + '_', Fore.WHITE + '/', Fore.WHITE + '_', Fore.WHITE + '_', Fore.WHITE + '~', Fore.WHITE + '0', Fore.WHITE + '_', Fore.WHITE + '\\', Fore.WHITE + '_', Fore.WHITE + ' '], 
@@ -19,7 +19,8 @@ class Boss(Meta):
         self.awake = False
         self._ltime = None
         self._bombs = []
-        super().__init__(game_height, game_width, [0,0], self._ascii.shape, self._ascii)
+        pos = [0, (2*paddle._pos[0] + paddle._size[0])//2]
+        super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
     def at_left_end(self):
         return self._pos[1] <= 0
@@ -45,7 +46,7 @@ class Boss(Meta):
     def add_bomb(self):
         if self.awake and ((not self._ltime) or \
            (clock() - self._ltime >= 5)):
-            pos = [(2*self._pos[0] + self._size[0] - 1)//2, self._pos[1] + self._size[1]]
+            pos = [self._pos[0] + self._size[0], (2*self._pos[1] + self._size[1])//2]
             bomb = Bomb(self._gh, self._gw, pos)
             self._bombs.append(bomb)
             self._ltime = clock() 

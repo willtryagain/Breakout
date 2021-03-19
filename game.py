@@ -44,7 +44,7 @@ class Game:
         self._display = Display(self._height, self._width)
         self._keyboard = KBHit()
         self._bricks = self.get_brick_pattern(1)
-        self._boss = Boss(self._height, self._width)
+        self._boss = Boss(self._height, self._width, self._paddle)
         self.fhit = None
         self._powerups = [] # self.add_powerups()
         self._player = Player()
@@ -59,7 +59,7 @@ class Game:
         y0 = self._width // 2
         h = 1
         w = 5
-        margin = 2
+        margin = 4
         breadth = y0//4
 
         if level == 1:
@@ -183,7 +183,7 @@ class Game:
         if type == None:
         # randomly choose from the various types of powerups
             type = choice(['expand', 'shrink', 'pgrab', 'thruball', 'fastball', 'gunpaddle']) # 
-            # type = choice(['gunpaddle'])
+            type = choice(['gunpaddle'])
 
 
         if type == 'expand':
@@ -455,8 +455,8 @@ class Game:
 
     def laser_handle(self):
         for laser in self._lasers:
-            index = laser.brick_collide(self._bricks)
-            if index != -1:
+            indices = laser.brick_collide(self._bricks)
+            for index in indices:
                 # debug += 'corners\n'
                 self._bricks[index]._velocity = Velocity(laser._velocity.getvx(), laser._velocity.getvy()) 
                 self._bricks[index]._rainbow = False
@@ -501,12 +501,15 @@ class Game:
                 self.end_game()
 
     def get_laser_stime(self):
+        global debug
         stimes = []
         for powerup in self._powerups:
             if powerup._kind == 'gunpaddle' and \
                 powerup._state == 'ACTIVE': 
                 stimes.append(powerup._start_time)
+
         if stimes:
+            debug += 'time: ' + ' '.join(map(str, stimes)) + '\n'
             return max(stimes)
                 
 
