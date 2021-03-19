@@ -23,7 +23,7 @@ class Powerup(Meta):
         self._start_time = start_time
         self._kind = ''
        
-        self._velocity = Velocity(gravity=settings.GRAVITY)
+        self._velocity = Velocity(gravity=0)
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
     def move(self, paddle=None):

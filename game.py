@@ -385,6 +385,7 @@ class Game:
         powerups = []
         for powerup in self._powerups:
             if powerup._state == 'FALL':
+                powerup._velocity.gravity = settings.GRAVITY
                 powerup.move()
             powerups.append(powerup)
         self._powerups = powerups
