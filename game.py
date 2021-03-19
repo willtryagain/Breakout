@@ -88,22 +88,22 @@ class Game:
             self._boss.awake = True
 
         # unbreakable and possible
-        brick = Brick(self._height, self._width, pos=[10, self._width//2])
+        brick = Brick(self._height, self._width, pos=[x0 + 2, self._width//2])
         brick._strength = 'INFINITY'
         brick.repaint()
         bricks.append(brick)
 
-        brick = Brick(self._height, self._width, pos=[11, self._width//2])
+        brick = Brick(self._height, self._width, pos=[x0 + 3, self._width//2])
         brick._rainbow = True
         brick.repaint()
         bricks.append(brick)
 
-        brick = Brick(self._height, self._width, pos=[10, self._width//2 + brick._size[1]])
+        brick = Brick(self._height, self._width, pos=[x0 + 2, self._width//2 + brick._size[1]])
         brick._rainbow = True
         brick.repaint()
         bricks.append(brick)
 
-        brick = Brick(self._height, self._width, pos=[11, self._width//2 + brick._size[1]])
+        brick = Brick(self._height, self._width, pos=[x0 + 3, self._width//2 + brick._size[1]])
         brick._strength = 'INFINITY'
         brick.repaint()
         bricks.append(brick)
@@ -178,16 +178,16 @@ class Game:
                     for brick in self._bricks:
                         brick.move()
                     self._last_time = clock()
+            elif ball.lost():
+                ball =  self.reset_game(ball)
+                new_balls = [ball]
+                break
             if not ball.trivial_collision(self._paddle):
                 ball = self.non_trivial_collision(ball)
                 debug += 'non \n'
             else:
                 debug += 't \n'
 
-            if ball.lost():
-                ball =  self.reset_game(ball)
-                new_balls = [ball]
-                break
             new_balls.append(ball)
         return new_balls
 
@@ -205,7 +205,7 @@ class Game:
         if type == None:
         # randomly choose from the various types of powerups
             type = choice(['expand', 'shrink', 'pgrab', 'thruball', 'fastball', 'gunpaddle']) # 
-            type = choice(['expand'])
+            type = choice(['gunpaddle', 'expand'])
 
 
         if type == 'expand':
@@ -321,7 +321,7 @@ class Game:
                 new_balls = []
                 for ball in self._balls:
                     if ball._velocity.getvx() == 0:
-                        ball._velocity.setvx(2)
+                        ball._velocity.setvx(1)
                     if  ball.paddle_collide(self._paddle):
                         if self._paddle._grab:
                             self._paddle._rel = ball._pos[1] - self._paddle._pos[1] 
@@ -530,7 +530,7 @@ class Game:
         if self._player._level == 4:
             raise SystemExit
         for brick in self._bricks:
-            if brick._pos[0] == self._height - 1:
+            if brick._pos[0] >= self._height - 2:
                 self.end_game()
 
     def get_laser_stime(self):

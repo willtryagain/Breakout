@@ -65,7 +65,7 @@ class Boss(Meta):
 
     def get_brick_layer(self):
         bricks = []
-        x = self._pos[0] + self._size[0]
+        x = self._pos[0] + self._size[0] + 2
         y = 0
         while y + 5 <= self._gw - settings.RIGHT_MARGIN:
             brick = Brick(self._gh, self._gw, [x, y], 1)

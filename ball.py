@@ -29,10 +29,10 @@ class Ball(Meta):
             vx = settings.MAX_SPEED
         else:
             vx = -settings.MAX_SPEED
-        if vy > 0:
-            vy = settings.MAX_SPEED
-        else:
-            vy = -settings.MAX_SPEED
+        # if vy > 0:
+        #     vy = settings.MAX_SPEED
+        # else:
+        #     vy = -settings.MAX_SPEED
         self._velocity.setvx(vx)
         self._velocity.setvy(vy)
 
