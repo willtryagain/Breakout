@@ -249,11 +249,7 @@ class Ball(Meta):
            
         return -1   
 
-    def lost(self):   
-        bottom_ball = self._pos[0] + self._size[0]
-        bottom_display = self._gh 
-        
-        return bottom_ball >= bottom_display
+   
 
     def brick_intersection(self, bricks):
         vx = self._velocity.getvx()

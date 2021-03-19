@@ -121,7 +121,7 @@ class Game:
         index = ball.brick_corners_collide(self._bricks)
         if index != -1:
             # debug += 'corners\n'
-            self._bricks[index]._velocity = ball._velocity
+            self._bricks[index]._velocity = Velocity(ball._velocity.getvx(), ball._velocity.getvy()) 
             self._bricks[index]._rainbow = False
             ball._velocity.reversevx()
             self._player._score += \
@@ -131,7 +131,7 @@ class Game:
 
         index = ball.brick_horizontal_collide(self._bricks)
         if index != -1:
-            self._bricks[index]._velocity = ball._velocity
+            self._bricks[index]._velocity = Velocity(ball._velocity.getvx(), ball._velocity.getvy()) 
             self._bricks[index]._rainbow = False
             # debug += 'horizontal\n'
             ball._velocity.reversevx()
@@ -142,7 +142,7 @@ class Game:
 
         index = ball.brick_vertical_collide(self._bricks)
         if index != -1:
-            self._bricks[index]._velocity = ball._velocity
+            self._bricks[index]._velocity = Velocity(ball._velocity.getvx(), ball._velocity.getvy()) 
             self._bricks[index]._rainbow = False
             ball._velocity.reversevy()
             self._player._score += \
@@ -458,7 +458,7 @@ class Game:
             index = laser.brick_corners_collide(self._bricks)
             if index != -1:
                 # debug += 'corners\n'
-                self._bricks[index]._velocity = laser._velocity
+                self._bricks[index]._velocity = Velocity(laser._velocity.getvx(), laser._velocity.getvy()) 
                 self._bricks[index]._rainbow = False
                 self._player._score += \
                     self._bricks[index].get_damage_points(laser)
@@ -467,7 +467,7 @@ class Game:
 
             index = laser.brick_vertical_collide(self._bricks)
             if index != -1:
-                self._bricks[index]._velocity = laser._velocity
+                self._bricks[index]._velocity = Velocity(laser._velocity.getvx(), laser._velocity.getvy())
                 self._bricks[index]._rainbow = False
                 self._player._score += \
                     self._bricks[index].get_damage_points(laser)

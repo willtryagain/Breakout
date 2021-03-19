@@ -62,3 +62,9 @@ class Meta:
             return True
 
         return False
+    
+    def lost(self):   
+        bottom_ball = self._pos[0] + self._size[0]
+        bottom_display = self._gh 
+        
+        return bottom_ball >= bottom_display

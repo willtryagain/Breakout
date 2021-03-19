@@ -44,7 +44,7 @@ class Boss(Meta):
 
     def add_bomb(self):
         if self.awake and ((not self._ltime) or \
-           (clock() - self._ltime >= settings.POWERUP_TIME)):
+           (clock() - self._ltime >= 5)):
             pos = [(2*self._pos[0] + self._size[0] - 1)//2, self._pos[1] + self._size[1]]
             bomb = Bomb(self._gh, self._gw, pos)
             self._bombs.append(bomb)
@@ -53,7 +53,7 @@ class Boss(Meta):
     def remove_bombs(self):
         indices = []
         for index, bomb in enumerate(self._bombs):
-            if bomb._pos[1] == self._gh - 1 - self._size[1]:
+            if bomb.lost():
                 indices.append(index)
 
         indices.sort(reverse=True)
