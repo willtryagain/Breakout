@@ -349,7 +349,7 @@ class Game:
 
     def get_powerup(self, pos):
         type = choice(['expand', 'shrink', 'fastball', 'pgrab', 'thruball'])
-        type = choice(['multi'])
+        # type = choice(['multi'])
 
         if type == 'expand':
             powerup = Expand(self._height, self._width, pos, clock())
