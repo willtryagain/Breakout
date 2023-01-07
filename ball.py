@@ -1,11 +1,17 @@
+"""
+ball
+"""
+
 import numpy as np
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 
 import settings
 from meta import Meta
 from velocity import Velocity
 
 class Ball(Meta):
+    """
+    """
     def __init__(self, game_height, game_width, pos):
         self._ascii = self.draw()
         self._dead = True
@@ -16,6 +22,8 @@ class Ball(Meta):
 
 
     def go_fast(self):
+        """
+        """
         vx = self._velocity.getvx()
         vy = self._velocity.getvy()
         if vx > 0:
