@@ -2,8 +2,7 @@ import numpy as np
 from colorama import Fore, Back, Style
 from time import monotonic as clock, sleep
 
-from meta import Meta
-from velocity import Velocity
+from meta import Meta, Velocity
 import settings
 
 class Powerup(Meta):
@@ -28,9 +27,9 @@ class Powerup(Meta):
 
     def move(self, paddle=None):
 
-        vx = self._velocity.getvx()
-        if self._pos[0] + vx <= self._gh - 1:
-            self._pos[0] +=  vx
+        vx = self._velocity.x
+        if self._pos.x + vx <= self._gh - 1:
+            self._pos.x +=  vx
         else:
             # the powerup fell down
             # it can't be used anymore
@@ -43,13 +42,13 @@ class Powerup(Meta):
         return true if collision 
         has taken place with the paddle
         """
-        left_paddle = paddle._pos[1]
-        right_paddle = paddle._pos[1] + paddle._size[1] - 1
-        top_paddle = paddle._pos[0]
+        left_paddle = paddle._pos.y
+        right_paddle = paddle._pos.y + paddle._size[1] - 1
+        top_paddle = paddle._pos.x
 
-        left_powerup = self._pos[1]
-        right_powerup = self._pos[1] + self._size[1] - 1
-        bottom_powerup = self._pos[0] + self._size[0] - 1
+        left_powerup = self._pos.y
+        right_powerup = self._pos.y + self._size[1] - 1
+        bottom_powerup = self._pos.x + self._size[0] - 1
         if bottom_powerup == top_paddle - 1:
             if left_paddle <= left_powerup and right_powerup <= right_paddle:
                 self._state = 'ACTIVE'

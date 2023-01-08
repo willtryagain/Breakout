@@ -1,16 +1,16 @@
 """
-ball
+Defines the Ball class
 """
 
 import numpy as np
 from colorama import Fore, Style
 
 import settings
-from meta import Meta
-from velocity import Velocity
+from meta import Meta, Velocity, Position
 
 class Ball(Meta):
     """
+    Defines the ball. Handles its motion on the screen.
     """
     def __init__(self, game_height, game_width, pos):
         self._ascii = self.draw()
@@ -22,72 +22,87 @@ class Ball(Meta):
 
 
     def go_fast(self):
-        """
-        """
-        vx = self._velocity.getvx()
-        vy = self._velocity.getvy()
-        if vx > 0:
-            vx = settings.MAX_SPEED
+        """increases the speed of ball"""
+        # TODO: refactor 
+        v_x = self._velocity.x
+        v_y = self._velocity.y
+        if v_x > 0:
+            v_x = settings.MAX_SPEED
         else:
-            vx = -settings.MAX_SPEED
-        if vy > 0:
-            vy = settings.MAX_SPEED
+            v_x = -settings.MAX_SPEED
+        if v_y > 0:
+            v_y = settings.MAX_SPEED
         else:
-            vy = -settings.MAX_SPEED
-        self._velocity.setvx(vx)
-        self._velocity.setvy(vy)
+            v_y = -settings.MAX_SPEED
+        self._velocity = Velocity(v_x, v_y)
 
 
     def move(self, key=None):
+        """updates the position of ball based on velocity"""
+
+        pos_x = self._pos.x
+        pos_y = self._pos.y
+
         if key is not None:
             if key == 'w':
-                self._pos[1] += 1
+                pos_y += 1
             elif key == 's':
-                self._pos[1] -= 1
+                pos_y -= 1
             return
 
-
-
         # increment by the velocities
-        self._pos[0] += self._velocity.vx
-        self._pos[1] += self._velocity.vy
+        
+        pos_x += self._velocity.x
+        pos_y += self._velocity.y
         
         # non-negative
-        self._pos[0] = max(self._pos[0], 0)
-        self._pos[1] = max(self._pos[1], 0)
+        pos_x = max(pos_x, 0)
+        pos_y = max(pos_y, 0)
         
         # upper bound
-        self._pos[0] = min(self._pos[0], self._gh - self._size[0])
-        self._pos[1] = min(self._pos[1], self._gw - self._size[1])
+        pos_x = min(pos_x, self._gh - self._size[0])
+        pos_y = min(pos_y, self._gw - self._size[1])
 
-    def draw(self, color=Fore.RED):
+        self._pos = Position(pos_x, pos_y)
+
+        
+
+    def draw(self):
+        """Returns the ascii representation"""
         return np.array([
-            Style.BRIGHT + Fore.RED + '(', 
+            Style.BRIGHT + Fore.RED + '(',
             Style.BRIGHT + Fore.RED + ')'],
             dtype='object'
         ).reshape(1, -1)
 
 
     def reverse_vy(self):
-        vy = self._velocity.getvy()
-        self._velocity.setvy(-vy)
-
-    def set_posy(self, pos):
-        self._pos[1] = pos
+        """reverses velocity of ball along Y axis"""
+        self._velocity.y = -self._velocity.y
 
     def reverse_vx(self):
-        vx = self._velocity.getvx()
-        self._velocity.setvx(-vx)
+        """reverses velocity of ball along X axis"""
+        self._velocity.x = -self._velocity.x
+
+    def set_posy(self, pos_y):
+        """Set y coordinate of the object"""
+        self._pos = Position(self._pos.x, pos_y) 
 
     def intersects(self, bricks):
-        left_ball = self._pos[1]
-        right_ball = self._pos[1] + self._size[1] - 1
-        top_ball = self._pos[0]
+        """
+        returns true if the ball's representation is intersecting with
+        the bricks
+        """
+        right_ball = self._pos.y + self._size[1] - 1
+        top_ball = self._pos.x
 
         for brick in bricks:
-            left_brick = brick._pos[1]
-            right_brick = brick._pos[1] + brick._size[1] - 1
-            top_brick = brick._pos[0]
+            brick_pos = brick.get_pos()
+            brick_size = brick.get_size()
+
+            left_brick,  = brick_pos.y
+            right_brick = brick_pos.y + brick_size[1] - 1
+            top_brick = brick_pos.x
 
             if top_brick == top_ball:
                 if left_brick <= right_ball and right_ball <= right_brick:
@@ -95,15 +110,23 @@ class Ball(Meta):
 
         return False
 
+
+    # ? move this to meta?
+
     def left(self):
-        self._pos[1] -= 1
-    
+        """ball moves left"""
+        self._pos = Position(self._pos.x, self._pos.y - 1)
+
     def right(self):
-        self._pos[1] += 1
+        """ball moves right"""
+        self._pos = Position(self._pos.x, self._pos.y + 1)
 
     def down(self):
-        self._pos[0] += 1
+        """ball moves down"""
+        self._pos = Position(self._pos.x + 1, self._pos.y)
 
     def up(self):
-        self._pos[0] -= 1
+        """ball moves up"""
+        self._pos = Position(self._pos.x - 1, self._pos.y)
+
     

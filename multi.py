@@ -3,6 +3,7 @@ import numpy as np
 from colorama import Fore, Back, Style
 
 from ball import Ball
+from meta import Velocity
 
 class Multi(Powerup):
     def __init__(self, game_height, game_width, pos, start_time):
@@ -19,13 +20,12 @@ class Multi(Powerup):
         for ball in balls:
             vx = -1
             vy = 1
-            ball1 = Ball(self._gh, self._gw, [ball._pos[0], ball._pos[1]])
-            ball1._velocity.setvx(vx)
-            ball1._velocity.setvy(vy)
+            ball1 = Ball(self._gh, self._gw, [ball._pos.x, ball._pos.y])
+            ball1._velocity = Velocity(vx, vy)
             ball._multi = False
             ball1._dead = False
 
-            ball2 = Ball(self._gh, self._gw, [ball._pos[0], ball._pos[1]])
+            ball2 = Ball(self._gh, self._gw, [ball._pos.x, ball._pos.y])
             ball2._velocity.setvx(vx)
             ball2._velocity.setvy(-vy)
             ball._dead = False

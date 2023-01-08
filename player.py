@@ -15,8 +15,8 @@ class Player:
         
 
     def display_stats(self, length, ball):
-        vx = ball._velocity.getvx()
-        vy = ball._velocity.getvy()
+        vx = ball._velocity.x
+        vy = ball._velocity.y
         
         time_passed = int(clock() - self._start)
         speed = int(np.sqrt(vx**2 + vy**2))

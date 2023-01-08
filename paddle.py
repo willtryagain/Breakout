@@ -1,8 +1,7 @@
 import numpy as np
 from colorama import Fore, Back, Style
 
-from velocity import Velocity 
-from meta import Meta
+from meta import Meta, Velocity, Position
 import settings
 
 class Paddle(Meta):
@@ -11,29 +10,41 @@ class Paddle(Meta):
         self._velocity = Velocity(0, 0)
         self._grab = False
         self._rel = 0
-        super().__init__(game_height, game_width, [game_height-1,\
-            game_width//2 - self._ascii.shape[1]], [1, 22], self._ascii)
+        super().__init__(game_height, game_width, Position(game_height-1,\
+            game_width//2 - self._ascii.shape[1]), [1, 22], self._ascii)
 
     def at_left_end(self):
-        return self._pos[1] <= 0
+        return self._pos.y <= 0
     
     def at_right_end(self):
-        return self._pos[1] + self._size[1] >= self._gw 
+        return self._pos.y + self._size[1] >= self._gw 
 
 
     def move(self, key):   
         if key == 'a':
             # move left
-            self._pos[1] -= settings.PADDLE_SPEED
+            self._pos = Velocity(
+                self._pos.x, 
+                self._pos.y - settings.PADDLE_SPEED
+            )
             if self.at_left_end():
                 # lower bound
-                self._pos[1] = 0
+                self._pos = Velocity(
+                    self._pos.x, 
+                    0
+                )
         elif key == 'd':
             # move right
-            self._pos[1] += settings.PADDLE_SPEED
+            self._pos = Velocity(
+                self._pos.x, 
+                self._pos.y + settings.PADDLE_SPEED
+            )
             if self.at_right_end():
                 # upper bound
-                self._pos[1] = self._gw - self._size[1]
+                 self._pos = Velocity(
+                    self._pos.x, 
+                    self._gw - self._size[1]
+                )
 
     def draw(self, len=20, color=Back.YELLOW):
 

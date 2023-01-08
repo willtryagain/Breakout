@@ -37,7 +37,7 @@ class Display:
         tail = item.get_tail()
         ascii = item.get_ascii()
         try:
-            self._canvas[ pos[0]: tail[0] + 1, pos[1]: tail[1] + 1] = ascii
+            self._canvas[ pos.x: tail.x + 1, pos.y: tail.y + 1] = ascii
         except (IndexError, ValueError) as e:
             print(e)
 

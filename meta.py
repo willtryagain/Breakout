@@ -1,18 +1,15 @@
 '''
-Defines the Meta class
+Defines the Meta class 
 '''
-from typing import List
+from typing import NamedTuple
 
 import numpy.typing as npt
 
 
-class Meta:
-    '''
-
-    The Meta class is responsible for storing the coordinates and ascii
-    representation of objects (for e.g. ball, paddle etc). It forms a backbone
-    of all the object classes visible on the screen.
-
+class Position(NamedTuple):
+    """
+    Represents the position on X-Y axis
+    
     The following directions are considered as X and Y.
 
     -----> Y
@@ -20,6 +17,25 @@ class Meta:
     |
     v
     X
+    
+    """
+    x: int
+    y: int
+
+
+class Velocity(NamedTuple):
+    """
+    Represents the speed on X-Y axis
+
+    """
+    x: int
+    y: int
+
+class Meta:
+    '''
+    The Meta class is responsible for storing the coordinates and ascii
+    representation of objects (for e.g. ball, paddle etc). It forms a backbone
+    of all the object classes visible on the screen.
 
     '''
 
@@ -27,7 +43,7 @@ class Meta:
         self,
         game_height : int,
         game_width : int,
-        pos : List[int, int],
+        pos : Position,
         size : int,
         ascii_arr : npt.ArrayLike
     ):
@@ -47,12 +63,24 @@ class Meta:
         """
         Returns the bottom-right coordinate of the object.
         """
-        x_0 = self._pos[0]
-        y_0 = self._pos[1]
-        return [x_0 + self._size[0] - 1, y_0 + self._size[1] - 1]
+
+        return Position(
+            self._pos.x + self._size[0] - 1,
+            self._pos.y + self._size[1] - 1
+        )
+    
+    def get_size(self):
+        """Returns the size of object"""
+        return self._size
+
 
     def get_ascii(self):
         """
         Returns the ascii representation of the object.
         """
         return self._ascii
+
+
+if __name__ == "__main__":
+    p = Position(1, 2)
+    print(p.x)

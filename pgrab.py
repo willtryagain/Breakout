@@ -21,7 +21,7 @@ class Pgrab(Powerup):
         grab the paddle
         """
         paddle._grab = True
-        paddle._rel = ball._pos[1] - paddle._pos[1] 
+        paddle._rel = ball._pos.y - paddle._pos.y 
         return paddle
 
     def reverse(self, paddle):
