@@ -1,10 +1,13 @@
-import numpy as np
-from colorama import Fore, Back, Style
-from time import monotonic as clock, sleep
+from time import monotonic as clock
+from time import sleep
 
+import numpy as np
+from colorama import Back, Fore, Style
+
+import settings
 from meta import Meta
 from velocity import Velocity
-import settings
+
 
 class Powerup(Meta):
     """
@@ -14,33 +17,30 @@ class Powerup(Meta):
     iii. ACTIVE: The powerup has been activated
     iv. DESTROY: The powerup has been used/dropped
     """
-    def __init__(self, game_height, game_width,  pos, start_time):
-        self._state = 'HIDE'
+
+    def __init__(self, game_height, game_width, pos, start_time):
+        self._state = "HIDE"
         self._ascii = np.array(
-            [Back.MAGENTA + '<', 
-            Back.MAGENTA + '>'], 
-            dtype='object').reshape(1, -1)
+            [Back.MAGENTA + "<", Back.MAGENTA + ">"], dtype="object"
+        ).reshape(1, -1)
         self._start_time = start_time
-        self._kind = ''
-       
-        self._velocity = Velocity(vx = settings.POWERUP_SPEED)
+        self._kind = ""
+
+        self._velocity = Velocity(vx=settings.POWERUP_SPEED)
         super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
 
     def move(self, paddle=None):
-
-        vx = self._velocity.getvx()
+        vx = self._velocity.vx
         if self._pos[0] + vx <= self._gh - 1:
-            self._pos[0] +=  vx
+            self._pos[0] += vx
         else:
             # the powerup fell down
             # it can't be used anymore
-            self._state = 'DELETE'
-        
- 
-    
+            self._state = "DELETE"
+
     def collision(self, paddle):
         """
-        return true if collision 
+        return true if collision
         has taken place with the paddle
         """
         left_paddle = paddle._pos[1]
@@ -52,7 +52,7 @@ class Powerup(Meta):
         bottom_powerup = self._pos[0] + self._size[0] - 1
         if bottom_powerup == top_paddle - 1:
             if left_paddle <= left_powerup and right_powerup <= right_paddle:
-                self._state = 'ACTIVE'
+                self._state = "ACTIVE"
                 self._start_time = clock()
                 return True
 
@@ -60,15 +60,15 @@ class Powerup(Meta):
 
     def time_up(self):
         if clock() - self._start_time >= settings.POWERUP_TIME:
-            self._state == 'DELETE' 
+            self._state == "DELETE"
             return True
-        
+
         return False
 
     def inc_mag(self, x, bias=2):
         if x == 0:
             return x
         sign = x // abs(x)
-        mag = abs(x)+ bias
+        mag = abs(x) + bias
         mag = min(mag, settings.MAX_SPEED)
-        return sign * mag 
+        return sign * mag

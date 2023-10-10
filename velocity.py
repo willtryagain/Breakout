@@ -1,17 +1,27 @@
 class Velocity:
-    def __init__(self, vx=0, vy=0):
-        self.vx = vx
-        self.vy = vy
+    """A class representing velocity."""
 
-    def getvx(self):
-        return self.vx
+    def __init__(self, vx: int = 0, vy: int = 0):
+        """Initialize the Velocity object with given x and y velocities."""
+        self._vx = vx
+        self._vy = vy
 
-    def getvy(self):
-        return self.vy
+    @property
+    def vx(self) -> int:
+        """Get the x velocity."""
+        return self._vx
 
-    def setvx(self, vx):
-        self.vx = vx
+    @property
+    def vy(self) -> int:
+        """Get the y velocity."""
+        return self._vy
 
-    def setvy(self, vy):
-        self.vy = vy
+    @vx.setter
+    def vx(self, value: int):
+        """Set the x velocity."""
+        self._vx = value
 
+    @vy.setter
+    def vy(self, value: int):
+        """Set the y velocity."""
+        self._vy = value
