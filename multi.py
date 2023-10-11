@@ -6,8 +6,8 @@ from powerup import Powerup
 
 
 class Multi(Powerup):
-    def __init__(self, game_height, game_width, pos, start_time):
-        super().__init__(game_height, game_width, pos, start_time)
+    def __init__(self, pos, start_time):
+        super().__init__(pos, start_time)
         self._ascii = np.array(
             [Back.BLUE + "2", Back.BLUE + "x"], dtype="object"
         ).reshape(1, -1)
@@ -18,13 +18,13 @@ class Multi(Powerup):
         for ball in balls:
             vx = -1
             vy = 1
-            ball1 = Ball(self._gh, self._gw, [ball._pos[0], ball._pos[1]])
+            ball1 = Ball([ball._pos[0], ball._pos[1]])
             ball1._velocity.vx = vx
             ball1._velocity.vy = vy
             ball._multi = False
             ball1._dead = False
 
-            ball2 = Ball(self._gh, self._gw, [ball._pos[0], ball._pos[1]])
+            ball2 = Ball([ball._pos[0], ball._pos[1]])
             ball2._velocity.vx = vx
             ball2._velocity.vy = -vy
             ball._dead = False

@@ -1,24 +1,21 @@
 import numpy as np
 
 
-class Meta:
-    '''
+class Sprite:
+    """
     -----> Y
     |
     |
-    v 
-    X 
+    v
+    X
 
-    '''
-    def __init__(self, game_height, game_width, pos, size, ascii):
+    """
 
-        self._gh = game_height
-        self._gw = game_width
-
+    def __init__(self, pos, size, ascii):
         self._pos = pos
         self._size = size
         self._ascii = ascii
-    
+
     def get_pos(self):
         return self._pos
 
@@ -31,6 +28,5 @@ class Meta:
         return self._ascii
 
     def draw(self):
-        """
-        """
+        """ """
         pass

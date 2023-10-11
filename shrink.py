@@ -8,8 +8,8 @@ class Shrink(Powerup):
     """
     Shrinks the size of the paddle by a certain amount.
     """
-    def __init__(self, game_height, game_width, pos, start_time):
-        super().__init__(game_height, game_width, pos, start_time)
+    def __init__(self, pos, start_time):
+        super().__init__(pos, start_time)
         self._ascii = np.array(
         [Back.MAGENTA + '>', 
         Back.MAGENTA + '<'], 

@@ -34,8 +34,6 @@ class Game:
         self._paddle = Paddle(self._height, self._width)
         self._balls = [
             Ball(
-                self._height,
-                self._width,
                 [
                     self._height - 2,
                     (2 * self._paddle._pos[1] + self._paddle._size[1]) // 2,
@@ -61,7 +59,7 @@ class Game:
 
         for i in range(level):
             for j in range(-i, i + 1):
-                brick = Brick(self._height, self._width, pos=[x0 + i * h, y0 + j * w])
+                brick = Brick(pos=[x0 + i * h, y0 + j * w])
                 brick._strength = choice([1, 2, 3, "INFINITY"])
                 brick.repaint_brick()
                 bricks.append(brick)
@@ -71,7 +69,7 @@ class Game:
         ):
             if y0 + j * w >= self._width or y0 + j * w < 0:
                 continue
-            brick = Brick(self._height, self._width, pos=[x0 + level * h, y0 + j * w])
+            brick = Brick(pos=[x0 + level * h, y0 + j * w])
             brick._strength = choice([1, 2, 3, "INFINITY"])
             brick.repaint_brick()
             bricks.append(brick)
@@ -79,8 +77,6 @@ class Game:
         for i in range(level - 1, -1, -1):
             for j in range(-i, i + 1):
                 brick = Brick(
-                    self._height,
-                    self._width,
                     pos=[x0 + (level + level - i) * h, y0 + j * w],
                 )
                 brick._strength = choice([1, 2, 3, "INFINITY"])
@@ -368,17 +364,17 @@ class Game:
         # type = choice(['multi'])
 
         if type == "expand":
-            powerup = Expand(self._height, self._width, pos, clock())
+            powerup = Expand(pos, clock())
         elif type == "shrink":
-            powerup = Shrink(self._height, self._width, pos, clock())
+            powerup = Shrink(pos, clock())
         elif type == "fastball":
-            powerup = Fastball(self._height, self._width, pos, clock())
+            powerup = Fastball(pos, clock())
         elif type == "multi":
-            powerup = Multi(self._height, self._width, pos, clock())
+            powerup = Multi(pos, clock())
         elif type == "pgrab":
-            powerup = Pgrab(self._height, self._width, pos, clock())
+            powerup = Pgrab(pos, clock())
         elif type == "thruball":
-            powerup = Thruball(self._height, self._width, pos, clock())
+            powerup = Thruball(pos, clock())
         powerup._state = "FALL"
         return powerup
 
@@ -442,7 +438,7 @@ class Game:
             elif key == "a" or key == "d":
                 new_balls = []
                 for ball in self._balls:
-                    self._paddle.move(key)
+                    self._paddle.move(key, self._width)
                     if ball._dead or (self._paddle._grab and ball._velocity.vx == 0):
                         self.ball_paddle_centre(ball, rel=None)
                     new_balls.append(ball)
@@ -455,7 +451,7 @@ class Game:
                     if not ball._dead:
                         pass
                     else:
-                        ball.move(key)
+                        ball.move(self._height, self._width, key)
                     new_balls.append(ball)
                 self._balls = new_balls
 
@@ -480,7 +476,7 @@ class Game:
         ball._dead = True
         self._display.alert()
         self._powerups = self.deactivate()
-        self._paddle.reset()
+        self._paddle.reset(self._height, self._width)
         ball._pos[0] = self._height - 2
         ball._pos[1] = randint(
             self._paddle._pos[1], self._paddle._pos[1] + self._paddle._size[1] - 2
@@ -495,14 +491,14 @@ class Game:
     def move_items(self):
         new_balls = []
         for ball in self._balls:
-            ball.move()
+            ball.move(self._height, self._width)
             new_balls.append(ball)
         self._balls = new_balls
 
         powerups = []
         for powerup in self._powerups:
             if powerup._state == "FALL":
-                powerup.move()
+                powerup.move(self._height)
             powerups.append(powerup)
         self._powerups = powerups
 

@@ -5,11 +5,11 @@ import numpy as np
 from colorama import Back, Fore, Style
 
 import settings
-from meta import Meta
+from sprite import Sprite
 from velocity import Velocity
 
 
-class Powerup(Meta):
+class Powerup(Sprite):
     """
     Powerup has four states
     i. HIDE: Hidden inside the brick
@@ -18,7 +18,7 @@ class Powerup(Meta):
     iv. DESTROY: The powerup has been used/dropped
     """
 
-    def __init__(self, game_height, game_width, pos, start_time):
+    def __init__(self, pos, start_time):
         self._state = "HIDE"
         self._ascii = np.array(
             [Back.MAGENTA + "<", Back.MAGENTA + ">"], dtype="object"
@@ -27,11 +27,15 @@ class Powerup(Meta):
         self._kind = ""
 
         self._velocity = Velocity(vx=settings.POWERUP_SPEED)
-        super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
+        super().__init__(pos, self._ascii.shape, self._ascii)
 
-    def move(self, paddle=None):
+    def move(
+        self,
+        game_height,
+        paddle=None,
+    ):
         vx = self._velocity.vx
-        if self._pos[0] + vx <= self._gh - 1:
+        if self._pos[0] + vx <= game_height - 1:
             self._pos[0] += vx
         else:
             # the powerup fell down

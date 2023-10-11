@@ -2,18 +2,18 @@ import numpy as np
 from colorama import Back, Fore, Style
 
 import settings
-from meta import Meta
+from sprite import Sprite
 from velocity import Velocity
 
 
-class Ball(Meta):
-    def __init__(self, game_height, game_width, pos):
+class Ball(Sprite):
+    def __init__(self, pos):
         self._ascii = self.draw()
         self._dead = True
         self._thru = False
         self._fast = False
         self._velocity = Velocity(0, 0)  # composition
-        super().__init__(game_height, game_width, pos, self._ascii.shape, self._ascii)
+        super().__init__(pos, self._ascii.shape, self._ascii)
 
     def go_fast(self):
         vx = self._velocity.vx
@@ -29,7 +29,7 @@ class Ball(Meta):
         self._velocity.vx = vx
         self._velocity.vy = vy
 
-    def move(self, key=None):
+    def move(self, game_height, game_width, key=None):
         if key is not None:
             if key == "w":
                 self._pos[1] += 1
@@ -46,8 +46,8 @@ class Ball(Meta):
         self._pos[1] = max(self._pos[1], 0)
 
         # upper bound
-        self._pos[0] = min(self._pos[0], self._gh - self._size[0])
-        self._pos[1] = min(self._pos[1], self._gw - self._size[1])
+        self._pos[0] = min(self._pos[0], game_height - self._size[0])
+        self._pos[1] = min(self._pos[1], game_width - self._size[1])
 
     def draw(self, color=Fore.RED):
         return np.array(

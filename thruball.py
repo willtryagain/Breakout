@@ -1,15 +1,16 @@
-from powerup import Powerup
 import numpy as np
-from colorama import Fore, Back, Style
+from colorama import Back, Fore, Style
+
+from powerup import Powerup
+
 
 class Thruball(Powerup):
-    def __init__(self, game_height, game_width, pos, start_time):
-        super().__init__(game_height, game_width, pos, start_time)
+    def __init__(self, pos, start_time):
+        super().__init__(pos, start_time)
         self._ascii = np.array(
-            [Back.BLUE + 'T', 
-            Back.BLUE + 'B'], 
-            dtype='object').reshape(1, -1) 
-        self._kind = 'thruball'
+            [Back.BLUE + "T", Back.BLUE + "B"], dtype="object"
+        ).reshape(1, -1)
+        self._kind = "thruball"
 
     def magic(self, balls):
         """
@@ -25,7 +26,7 @@ class Thruball(Powerup):
         """
         deactivate the powerup
         """
-        self._state = 'DELETE'
+        self._state = "DELETE"
         new_balls = []
         for ball in balls:
             ball._thru = False
