@@ -31,11 +31,21 @@ class Display:
         return np.array(text, dtype="object")
 
     def put(self, item):
+<<<<<<< HEAD
         x = max(item.x, 0)
         x = min(x, self._height - item.height)
         y = max(item.y, 0)
         y = min(y, self._width - item.width)
         item.draw(self._canvas)
+=======
+        pos = item.get_pos()
+        tail = item.get_tail()
+        ascii = item.get_ascii()
+        try:
+            self._canvas[ pos.x: tail.x + 1, pos.y: tail.y + 1] = ascii
+        except (IndexError, ValueError) as e:
+            print(e)
+>>>>>>> 92b80f26c4c2d56b8544f5f4ef6c990dd93d62ae
 
     def clrscr(self):
         for i in range(self._height):
