@@ -18,13 +18,13 @@ class Multi(Powerup):
         for ball in balls:
             vx = -1
             vy = 1
-            ball1 = Ball([ball._pos[0], ball._pos[1]])
+            ball1 = Ball(ball.x, ball.y)
             ball1._velocity.vx = vx
             ball1._velocity.vy = vy
             ball._multi = False
             ball1._dead = False
 
-            ball2 = Ball([ball._pos[0], ball._pos[1]])
+            ball2 = Ball(ball.x, ball.y)
             ball2._velocity.vx = vx
             ball2._velocity.vy = -vy
             ball._dead = False

@@ -1,10 +1,12 @@
-from powerup import Powerup
 import settings
+from powerup import Powerup
+
 
 class Expand(Powerup):
     """
     Increases the size of the paddle by a certain amount.
     """
+
     def __init__(self, pos, start_time):
         super().__init__(pos, start_time)
 
@@ -19,6 +21,6 @@ class Expand(Powerup):
         """
         deactivate the powerup
         """
-        self._state = 'DELETE'
+        self._state = "DELETE"
         paddle.update(-settings.EXPAND_VAL)
         return paddle

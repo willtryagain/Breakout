@@ -1,34 +1,41 @@
+from typing import Any
+
 import numpy as np
+import numpy.typing as npt
 from colorama import Back, Fore, Style
+
 from sprite import Sprite
 
 
 class Brick(Sprite):
-    def __init__(self, pos, strength=3):
+    def __init__(self, x, y, strength=3):
+        super().__init__(x, y)
+        self.reset_ascii()
+        self._strength = strength
+
+    def reset_ascii(self, **kwargs) -> npt.NDArray[Any]:
+        """
+        Resets the ASCII representation of the sprite.
+        Additional keyword arguments can be provided.
+        """
+        length = kwargs.get("length", 5)
+        color = kwargs.get("color", Back.RED)
         self._ascii = np.array(
-            [
-                Back.RED + " ",
-                Back.RED + " ",
-                Back.RED + " ",
-                Back.RED + " ",
-                Back.RED + " ",
-            ],
+            [color + " "] * length,
             dtype="object",
         ).reshape(1, -1)
-        self._strength = strength
-        super().__init__(pos, self._ascii.shape, self._ascii)
 
     def repaint_brick(self):
         if self._strength == "INFINITY":
-            self.draw(Back.CYAN)
+            self.reset_ascii(color=Back.CYAN)
         elif self._strength == 3:
-            self.draw(Back.RED)
+            self.reset_ascii(color=Back.RED)
         elif self._strength == 2:
-            self.draw(Back.GREEN)
+            self.reset_ascii(color=Back.GREEN)
         elif self._strength == 1:
-            self.draw(Back.MAGENTA)
+            self.reset_ascii(color=Back.MAGENTA)
         elif self._strength == 0:
-            self.draw(Back.BLUE)
+            self.reset_ascii(color=Back.BLUE)
 
     def get_damage_points(self, player, ball=None):
         """ """
@@ -51,5 +58,3 @@ class Brick(Sprite):
             return 1
         return 0
 
-    def draw(self, color, len=5):
-        self._ascii = [color + " "] * len

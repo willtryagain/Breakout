@@ -16,35 +16,25 @@ from kbhit import KBHit
 from multi import Multi
 from paddle import Paddle
 from pgrab import Pgrab
-from player import Player
 from powerup import Powerup
 from shrink import Shrink
 from thruball import Thruball
-from velocity import Velocity
 
 debug = ""
 
 
 class Game:
-    def __init__(self):
-        r, c = os.popen("stty size", "r").read().split()
-        self._height = int(r) - settings.BOTTOM_MARGIN
-        self._width = int(c) - settings.RIGHT_MARGIN
+    """
+    This class acts like the puppeteer for the sprites. It orchestrates the game from start to end.
+    """
+    def __init__(self, IO, sprites, player):
+        """
+        
+        """
         self.PAUSED = False
-        self._paddle = Paddle(self._height, self._width)
-        self._balls = [
-            Ball(
-                [
-                    self._height - 2,
-                    (2 * self._paddle._pos[1] + self._paddle._size[1]) // 2,
-                ],
-            )
-        ]
-        self._display = Display(self._height, self._width)
-        self._keyboard = KBHit()
-        self._bricks = self.get_brick_pattern()
-        self._powerups = []  # self.add_powerups()
-        self._player = Player()
+        self.IO = IO
+        self.sprites = sprites
+        self.player = player
 
     def get_brick_pattern(self):
         """
@@ -52,14 +42,14 @@ class Game:
         """
         bricks = []
         x0 = settings.BRICK_START_ROW
-        y0 = self._width // 2
+        y0 = self.width // 2
         h = 1
         w = 5
         level = y0 // 8
 
         for i in range(level):
             for j in range(-i, i + 1):
-                brick = Brick(pos=[x0 + i * h, y0 + j * w])
+                brick = Brick(x0 + i * h, y0 + j * w)
                 brick._strength = choice([1, 2, 3, "INFINITY"])
                 brick.repaint_brick()
                 bricks.append(brick)
@@ -67,18 +57,16 @@ class Game:
         for j in range(
             -level - settings.BRICK_LENGTH, level + settings.BRICK_LENGTH + 1
         ):
-            if y0 + j * w >= self._width or y0 + j * w < 0:
+            if y0 + j * w >= self.width or y0 + j * w < 0:
                 continue
-            brick = Brick(pos=[x0 + level * h, y0 + j * w])
+            brick = Brick(x0 + level * h, y0 + j * w)
             brick._strength = choice([1, 2, 3, "INFINITY"])
             brick.repaint_brick()
             bricks.append(brick)
 
         for i in range(level - 1, -1, -1):
             for j in range(-i, i + 1):
-                brick = Brick(
-                    pos=[x0 + (level + level - i) * h, y0 + j * w],
-                )
+                brick = Brick(x0 + (level + level - i) * h, y0 + j * w)
                 brick._strength = choice([1, 2, 3, "INFINITY"])
                 brick.repaint_brick()
                 bricks.append(brick)
@@ -89,13 +77,13 @@ class Game:
         """
         check if ball collided with the paddle
         """
-        left_paddle = self._paddle._pos[1]
-        right_paddle = self._paddle._pos[1] + self._paddle._size[1] - 1
-        height_paddle = self._paddle._pos[0]
+        left_paddle = self._paddle.y
+        right_paddle = self._paddle.y + self._paddle.width - 1
+        height_paddle = self._paddle.x
 
-        height_ball = ball._pos[0]
-        left_ball = ball._pos[1]
-        right_ball = ball._pos[1] + ball._size[1]
+        height_ball = ball.x
+        left_ball = ball.y
+        right_ball = ball.y + ball.width
 
         # ball is just above paddle
         if height_ball == height_paddle - 1:
@@ -110,10 +98,10 @@ class Game:
             ball._velocity.vy = 1
 
         # middle position of paddle
-        mid = (2 * self._paddle._pos[1] + self._paddle._size[1] - 1) // 2
+        mid = (2 * self._paddle.y + self._paddle.width - 1) // 2
 
         # in first half
-        if ball._pos[1] < mid:
+        if ball.y < mid:
             # go left
             sign = -1
         else:
@@ -126,7 +114,7 @@ class Game:
         vy = ball._velocity.vy
 
         # distance from the middle
-        bias = abs(mid - ball._pos[1]) // 2
+        bias = abs(mid - ball.y) // 2
 
         vy = sign * abs(Powerup.inc_mag(vy, bias))
         ball._velocity.vx = vx
@@ -138,11 +126,11 @@ class Game:
         """
         check if ball collided with the side walls
         """
-        left_ball = ball._pos[1]
-        right_ball = ball._pos[1] + ball._size[1] - 1
+        left_ball = ball.y
+        right_ball = ball.y + ball.width - 1
 
         left_wall = 0
-        right_wall = self._width - 1
+        right_wall = self.width - 1
 
         # hits the side walls
         if left_ball == left_wall or right_wall == right_ball:
@@ -154,7 +142,7 @@ class Game:
         """
         check if ball collided with the top wall
         """
-        top_ball = ball._pos[0]
+        top_ball = ball.x
         top_wall = 0
 
         if top_ball == top_wall:
@@ -177,18 +165,18 @@ class Game:
            o
 
         """
-        top_ball = ball._pos[0]
-        bottom_ball = ball._pos[0] + ball._size[0]
+        top_ball = ball.x
+        bottom_ball = ball.x + ball.height
 
-        left_ball = ball._pos[1]
-        right_ball = ball._pos[1] + ball._size[1]
+        left_ball = ball.y
+        right_ball = ball.y + ball.width
 
         for index, brick in enumerate(self._bricks):
-            left_brick = brick._pos[1]
-            right_brick = left_brick + brick._size[1]
+            left_brick = brick.y
+            right_brick = left_brick + brick.width
 
-            top_brick = brick._pos[0]
-            bottom_brick = top_brick + brick._size[0]
+            top_brick = brick.x
+            bottom_brick = top_brick + brick.height
 
             in_between = left_brick <= left_ball and right_ball <= right_brick
 
@@ -214,18 +202,18 @@ class Game:
             [|||||]    o
         """
 
-        top_ball = ball._pos[0]
-        bottom_ball = ball._pos[0] + ball._size[0]
+        top_ball = ball.x
+        bottom_ball = ball.x + ball.height
 
-        left_ball = ball._pos[1]
-        right_ball = ball._pos[1] + ball._size[1]
+        left_ball = ball.y
+        right_ball = ball.y + ball.width
 
         for index, brick in enumerate(self._bricks):
-            left_brick = brick._pos[1]
-            right_brick = left_brick + brick._size[1]
+            left_brick = brick.y
+            right_brick = left_brick + brick.width
 
-            top_brick = brick._pos[0]
-            bottom_brick = top_brick + brick._size[0]
+            top_brick = brick.x
+            bottom_brick = top_brick + brick.height
 
             in_between = top_brick <= top_ball and bottom_ball <= bottom_brick
 
@@ -240,18 +228,18 @@ class Game:
         return -1
 
     def ball_brick_corners_collide(self, ball):
-        top_ball = ball._pos[0]
-        bottom_ball = ball._pos[0] + ball._size[0]
+        top_ball = ball.x
+        bottom_ball = ball.x + ball.height
 
-        left_ball = ball._pos[1]
-        right_ball = ball._pos[1] + ball._size[1]
+        left_ball = ball.y
+        right_ball = ball.y + ball.width
 
         for index, brick in enumerate(self._bricks):
-            left_brick = brick._pos[1]
-            right_brick = left_brick + brick._size[1]
+            left_brick = brick.y
+            right_brick = left_brick + brick.width
 
-            top_brick = brick._pos[0]
-            bottom_brick = top_brick + brick._size[0]
+            top_brick = brick.x
+            bottom_brick = top_brick + brick.height
 
             if bottom_ball == top_brick:
                 if (left_ball <= left_brick and left_brick <= right_ball) or (
@@ -268,8 +256,8 @@ class Game:
         return -1
 
     def lost_ball(self, ball):
-        bottom_ball = ball._pos[0] + ball._size[0]
-        bottom_display = self._height
+        bottom_ball = ball.x + ball.height
+        bottom_display = self.height
 
         return bottom_ball >= bottom_display
 
@@ -279,14 +267,14 @@ class Game:
         vy = ball._velocity.vy
         while ball.intersects(self._bricks):
             if vx < 0:
-                ball.down()
+                ball.move_down()
             else:
-                ball.up()
+                ball.move_up()
 
             if vy < 0:
-                ball.right()
+                ball.move_right()
             else:
-                ball.left()
+                ball.move_right()
         # debug += str(self.ball_brick_horizontal_collide(ball)) + ':' + \
         #     str(self.ball_brick_vertical_collide(ball)) + '\n'
         # ball.reverse_vx()
@@ -384,9 +372,9 @@ class Game:
         for index, brick in enumerate(self._bricks):
             if brick._strength == 0:
                 indices.append(index)
-                pos = [brick._pos[0], brick._pos[1]]
-                powerup = self.get_powerup(pos)
-                self._powerups.append(powerup)
+                pos = [brick.x, brick.y]
+                # powerup = self.get_powerup(pos)
+                # self._powerups.append(powerup)
 
         indices.sort(reverse=True)
         for index in indices:
@@ -409,16 +397,16 @@ class Game:
         self.remove_powerups()
 
     def ball_paddle_centre(self, ball, rel=None):
-        left_paddle = self._paddle._pos[1]
-        right_paddle = self._paddle._pos[1] + self._paddle._size[1] - 1
+        left_paddle = self._paddle.y
+        right_paddle = self._paddle.y + self._paddle.width - 1
         mid = (left_paddle + right_paddle) // 2
 
         if rel:
             y = left_paddle + rel
-            ball.set_posy(y)
+            ball.move_y_to(y)
             return ball
 
-        ball.set_posy(mid)
+        ball.move_y_to(mid)
         return ball
 
     def handle_keys(self):
@@ -438,7 +426,7 @@ class Game:
             elif key == "a" or key == "d":
                 new_balls = []
                 for ball in self._balls:
-                    self._paddle.move(key, self._width)
+                    self._paddle.move(key, self.width)
                     if ball._dead or (self._paddle._grab and ball._velocity.vx == 0):
                         self.ball_paddle_centre(ball, rel=None)
                     new_balls.append(ball)
@@ -451,7 +439,7 @@ class Game:
                     if not ball._dead:
                         pass
                     else:
-                        ball.move(self._height, self._width, key)
+                        ball.move(self.height, self.width, key)
                     new_balls.append(ball)
                 self._balls = new_balls
 
@@ -476,11 +464,9 @@ class Game:
         ball._dead = True
         self._display.alert()
         self._powerups = self.deactivate()
-        self._paddle.reset(self._height, self._width)
-        ball._pos[0] = self._height - 2
-        ball._pos[1] = randint(
-            self._paddle._pos[1], self._paddle._pos[1] + self._paddle._size[1] - 2
-        )
+        self._paddle = Paddle(self.height, self.width)
+        ball.x = self.height - 2
+        ball.y = randint(self._paddle.y, self._paddle.y + self._paddle.width - 2)
         self._player.lose_life()
         if self._player._lives == 0:
             self.end_game()
@@ -491,14 +477,14 @@ class Game:
     def move_items(self):
         new_balls = []
         for ball in self._balls:
-            ball.move(self._height, self._width)
+            ball.move(self.height, self.width)
             new_balls.append(ball)
         self._balls = new_balls
 
         powerups = []
         for powerup in self._powerups:
             if powerup._state == "FALL":
-                powerup.move(self._height)
+                powerup.move(self.height)
             powerups.append(powerup)
         self._powerups = powerups
 
@@ -596,6 +582,6 @@ class Game:
             self._display.clrscr()
             self.add_items()
             self._display.show()
-            self._player.display_stats(self._paddle._size[1], self._balls[0])
+            self._player.display_stats(self._paddle.width, self._balls[0])
             self.wait(time)
             debug += str(self._balls[0]._thru) + "\n"

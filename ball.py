@@ -1,4 +1,7 @@
+from typing import Any
+
 import numpy as np
+import numpy.typing as npt
 from colorama import Back, Fore, Style
 
 import settings
@@ -7,89 +10,60 @@ from velocity import Velocity
 
 
 class Ball(Sprite):
-    def __init__(self, pos):
-        self._ascii = self.draw()
+    def __init__(self, screen_height, paddle_y, paddle_width):
+        super().__init__(screen_height - 2, (2 * paddle_y + paddle_width) // 2)
+        self.reset_ascii()
         self._dead = True
         self._thru = False
         self._fast = False
-        self._velocity = Velocity(0, 0)  # composition
-        super().__init__(pos, self._ascii.shape, self._ascii)
+        self._velocity = Velocity(0, 0)
 
-    def go_fast(self):
-        vx = self._velocity.vx
-        vy = self._velocity.vy
-        if vx > 0:
-            vx = settings.MAX_SPEED
-        else:
-            vx = -settings.MAX_SPEED
-        if vy > 0:
-            vy = settings.MAX_SPEED
-        else:
-            vy = -settings.MAX_SPEED
-        self._velocity.vx = vx
-        self._velocity.vy = vy
-
-    def move(self, game_height, game_width, key=None):
-        if key is not None:
-            if key == "w":
-                self._pos[1] += 1
-            elif key == "s":
-                self._pos[1] -= 1
-            return
-
-        # increment by the velocities
-        self._pos[0] += self._velocity.vx
-        self._pos[1] += self._velocity.vy
-
-        # non-negative
-        self._pos[0] = max(self._pos[0], 0)
-        self._pos[1] = max(self._pos[1], 0)
-
-        # upper bound
-        self._pos[0] = min(self._pos[0], game_height - self._size[0])
-        self._pos[1] = min(self._pos[1], game_width - self._size[1])
-
-    def draw(self, color=Fore.RED):
-        return np.array(
+    def reset_ascii(self, **kwargs) -> np.ndarray:
+        """
+        Resets the ASCII representation of the sprite.
+        Additional keyword arguments can be provided.
+        """
+        self._ascii = np.array(
             [Style.BRIGHT + Fore.RED + "(", Style.BRIGHT + Fore.RED + ")"],
             dtype="object",
         ).reshape(1, -1)
 
-    def reverse_vy(self):
-        vy = self._velocity.vy
-        self._velocity.vy = -vy
+    def go_fast(self):
+        self._velocity.vx = (
+            settings.MAX_SPEED if self._velocity.vx > 0 else -settings.MAX_SPEED
+        )
+        self._velocity.vy = (
+            settings.MAX_SPEED if self._velocity.vy > 0 else -settings.MAX_SPEED
+        )
 
-    def set_posy(self, pos):
-        self._pos[1] = pos
+    def move(self, screen_height: int, screen_width: int, key: str = None):
+        if key is not None:
+            if key == settings.MOVE_RIGHT_KEY:
+                self.move_right()
+            elif key == settings.MOVE_LEFT_KEY:
+                self.move_left()
+            return
+
+        super().move(self._velocity.vx, self._velocity.vy)
+        self.x = max(0, min(self.x, screen_height - self.height))
+        self.y = max(0, min(self.y, screen_width - self.width))
+
+    def reverse_vy(self):
+        self._velocity.vy = -self._velocity.vy
 
     def reverse_vx(self):
-        vx = self._velocity.vx
-        self._velocity.vx = -vx
+        self._velocity.vx = -self._velocity.vx
 
-    def intersects(self, bricks):
-        left_ball = self._pos[1]
-        right_ball = self._pos[1] + self._size[1] - 1
-        top_ball = self._pos[0]
+    def intersects(self, bricks) -> bool:
+        right_ball = self.y + self.width - 1
+        top_ball = self.x
 
         for brick in bricks:
-            left_brick = brick._pos[1]
-            right_brick = brick._pos[1] + brick._size[1] - 1
-            top_brick = brick._pos[0]
+            left_brick = brick.y
+            right_brick = brick.y + brick.width - 1
+            top_brick = brick.x
 
-            if top_brick == top_ball:
-                if left_brick <= right_ball and right_ball <= right_brick:
-                    return True
+            if top_brick == top_ball and left_brick <= right_ball <= right_brick:
+                return True
 
         return False
-
-    def left(self):
-        self._pos[1] -= 1
-
-    def right(self):
-        self._pos[1] += 1
-
-    def down(self):
-        self._pos[0] += 1
-
-    def up(self):
-        self._pos[0] -= 1
