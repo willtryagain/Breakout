@@ -62,7 +62,4 @@ It is the parent class of all the powerups. This handles the movement of the pow
 * #### Pgrab
 * Paddle Grab: Allows the paddle to grab the ball on contact and relaunch the ball at will.
 
-$$
 
-
-$$
