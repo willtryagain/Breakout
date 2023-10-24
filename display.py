@@ -9,14 +9,14 @@ class Display:
     ERASE = "\033[2J"
 
     def __init__(self, height, width):
-        self._height = height
-        self._width = width
+        self.height = height
+        self.width = width
         self._back = np.array(
-            [[Back.BLACK for j in range(self._width)] for i in range(self._height)],
+            [[Back.BLACK for j in range(self.width)] for i in range(self.height)],
             dtype="object",
         )
         self._canvas = np.array(
-            [[" " for j in range(self._width)] for i in range(self._height)],
+            [[" " for j in range(self.width)] for i in range(self.height)],
             dtype="object",
         )
 
@@ -32,14 +32,14 @@ class Display:
 
     def put(self, item):
         x = max(item.x, 0)
-        x = min(x, self._height - item.height)
+        x = min(x, self.height - item.height)
         y = max(item.y, 0)
-        y = min(y, self._width - item.width)
+        y = min(y, self.width - item.width)
         item.draw(self._canvas)
 
     def clrscr(self):
-        for i in range(self._height):
-            for j in range(self._width):
+        for i in range(self.height):
+            for j in range(self.width):
                 self._canvas[i][j] = " "
 
     def alert(self, color=Fore.RED):
@@ -62,8 +62,8 @@ class Display:
         # ANSI escape for resetting screen point to top
         print("\033[0;0H")
 
-        for i in range(self._height):
-            for j in range(self._width):
+        for i in range(self.height):
+            for j in range(self.width):
                 print(self._back[i][j] + self._canvas[i][j], end="")
             print()  # next line
 

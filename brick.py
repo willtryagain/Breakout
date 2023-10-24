@@ -10,8 +10,8 @@ from sprite import Sprite
 class Brick(Sprite):
     def __init__(self, x, y, strength=3):
         super().__init__(x, y)
-        self.reset_ascii()
         self._strength = strength
+        self.repaint_brick()
 
     def reset_ascii(self, **kwargs) -> npt.NDArray[Any]:
         """
@@ -37,7 +37,7 @@ class Brick(Sprite):
         elif self._strength == 0:
             self.reset_ascii(color=Back.BLUE)
 
-    def get_damage_points(self, player, ball=None):
+    def get_damage_points(self, ball=None):
         """ """
         if self._strength == "INFINITY":
             if ball._thru:
