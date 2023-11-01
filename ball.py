@@ -54,6 +54,12 @@ class Ball(Sprite):
     def reverse_vx(self):
         self._velocity.vx = -self._velocity.vx
 
+    def set_vx(self, vx: int):
+        self._velocity.vx = vx
+
+    def set_vy(self, vy: int):
+        self._velocity.vy = vy
+
     def intersects(self, bricks) -> bool:
         right_ball = self.y + self.width - 1
         top_ball = self.x
