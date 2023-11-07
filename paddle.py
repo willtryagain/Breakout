@@ -17,8 +17,11 @@ class Paddle(Sprite):
             game_width // 2 - self._ascii.shape[1],
         )
         self._velocity = Velocity(0, 0)
-        self._grab = False
+        self.grab = False
         self._rel = 0
+
+    def __repr__(self) -> str:
+        return f"Paddle(y={self.y}, width={self.width}, x={self.x})"
 
     def at_left_end(self):
         return self.y <= 0

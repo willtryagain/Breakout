@@ -20,6 +20,9 @@ class Display:
             dtype="object",
         )
 
+    def __repr__(self) -> str:
+        return f"Display({self.height}, {self.width})"
+
     def get_text(self, path="rip.txt"):
         text = []
         try:

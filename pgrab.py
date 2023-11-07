@@ -21,7 +21,7 @@ class Pgrab(Powerup):
         """
         grab the paddle
         """
-        paddle._grab = True
+        paddle.grab = True
         paddle._rel = ball.y - paddle.y
         return paddle
 
@@ -30,6 +30,6 @@ class Pgrab(Powerup):
         deactivate the powerup
         """
         self._state = "DELETE"
-        paddle._grab = False
+        paddle.grab = False
         paddle._rel = 0
         return paddle

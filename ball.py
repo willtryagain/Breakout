@@ -18,6 +18,11 @@ class Ball(Sprite):
         self._fast = False
         self._velocity = Velocity(0, 0)
 
+    def __str__(self) -> str:
+        return f"Ball(y={self.y}, x={self.x}, vx={self._velocity.vx}, \
+            vy={self._velocity.vy}, dead={self._dead}, thru={self._thru}, \
+                fast={self._fast})"
+
     def reset_ascii(self, **kwargs) -> np.ndarray:
         """
         Resets the ASCII representation of the sprite.
@@ -58,6 +63,22 @@ class Ball(Sprite):
         self._velocity.vx = vx
 
     def set_vy(self, vy: int):
+        self._velocity.vy = vy
+
+    @property
+    def vx(self):
+        return self._velocity.vx
+
+    @vx.setter
+    def vx(self, vx: int):
+        self._velocity.vx = vx
+
+    @property
+    def vy(self):
+        return self._velocity.vy
+
+    @vy.setter
+    def vy(self, vy: int):
         self._velocity.vy = vy
 
     def intersects(self, bricks) -> bool:

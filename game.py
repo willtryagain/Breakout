@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from random import choice, randint, random
@@ -29,7 +30,9 @@ class Game:
     This class acts like the puppeteer for the sprites. It orchestrates the game from start to end.
     """
 
-    def __init__(self, display, kbhit, ball, paddle, brick_container, player):
+    def __init__(
+        self, display, kbhit, ball, paddle, brick_container, collision_handler, player
+    ):
         """ """
         self.PAUSED = False
         self.display = display
@@ -37,83 +40,9 @@ class Game:
         self.ball = ball
         self.paddle = paddle
         self.brick_container = brick_container
+        self.collision_handler = collision_handler
         self.player = player
         self._powerups = []
-
-    def ball_paddle_collide(self):
-        """
-        check if ball collided with the paddle
-        """
-        left_paddle = self.paddle.y
-        right_paddle = self.paddle.y + self.paddle.width - 1
-        height_paddle = self.paddle.x
-
-        height_ball = self.ball.x
-        left_ball = self.ball.y
-        right_ball = self.ball.y + self.ball.width
-
-        # ball is just above paddle
-        if height_ball == height_paddle - 1:
-            if left_paddle <= left_ball and right_ball <= right_paddle:
-                return True
-
-        return False
-
-    def ball_paddle_collide_handle(self):
-        if self.ball._dead or self.paddle._grab:
-            self.ball._velocity.vx = -1
-            self.ball._velocity.vy = 1
-
-        # middle position of paddle
-        mid = (2 * self.paddle.y + self.paddle.width - 1) // 2
-
-        # in first half
-        if self.ball.y < mid:
-            # go left
-            sign = -1
-        else:
-            # go right
-            sign = 1
-        vx = self.ball._velocity.vx
-        if vx > 0:
-            raise ValueError("check vx")
-
-        vy = self.ball._velocity.vy
-
-        # distance from the middle
-        bias = abs(mid - self.ball.y) // 2
-
-        vy = sign * abs(Powerup.inc_mag(vy, bias))
-        self.ball._velocity.vx = vx
-        self.ball._velocity.vy = vy
-
-    def ball_side_walls_collide(self):
-        """
-        check if ball collided with the side walls
-        """
-        left_ball = self.ball.y
-        right_ball = self.ball.y + self.ball.width - 1
-
-        left_wall = 0
-        right_wall = self.display.width - 1
-
-        # hits the side walls
-        if left_ball == left_wall or right_wall == right_ball:
-            return True
-
-        return False
-
-    def ball_top_collide(self):
-        """
-        check if ball collided with the top wall
-        """
-        top_ball = self.ball.x
-        top_wall = 0
-
-        if top_ball == top_wall:
-            return True
-
-        return False
 
     def ball_brick_horizontal_collide(self):
         """
@@ -245,60 +174,69 @@ class Game:
         # self.ball.reverse_vx()
 
     def collide(self):
-        global debug
-        if self.ball._dead:
-            return
+        logging.debug("collide")
+        logging.debug(self.collision_handler)
+        request = {
+            "ball": self.ball,
+            "display": self.display,
+            "paddle": self.paddle,
+            "brick_container": self.brick_container,
+        }
+        resp = self.collision_handler.handle(request)
 
-        if self.ball_side_walls_collide():
-            self.ball.reverse_vy()
-            return
+        logging.debug(self.collision_handler)
+        logging.debug(resp)
 
-        if self.ball_top_collide():
-            self.ball.reverse_vx()
-            return
+        # if self.ball_side_walls_collide():
+        #     self.ball.reverse_vy()
+        #     return
 
-        if self.ball_paddle_collide():
-            if self.paddle._grab:
-                self.ball._velocity.vx = 0
-                self.ball._velocity.vy = 0
-            else:
-                self.ball.reverse_vx()
-                self.ball_paddle_collide_handle()
-            return
+        # if self.ball_top_collide():
+        #     self.ball.reverse_vx()
+        #     return
 
-        if self.ball.intersects(self.brick_container.sprites):
-            self.ball_brick_intersection()
+        # if self.ball_paddle_collide():
+        #     if self.paddle.grab:
+        #         self.ball._velocity.vx = 0
+        #         self.ball._velocity.vy = 0
+        #     else:
+        #         self.ball.reverse_vx()
+        #         self.ball_paddle_collide_handle()
+        #     return
 
-        index = self.ball_brick_corners_collide()
-        if index != -1:
-            # debug += 'corners\n'
-            self.ball.reverse_vx()
-            self.player._score += self.brick_container.sprites[index].get_damage_points(
-                self.ball
-            )
-            self.brick_container.sprites[index].repaint_brick()
-            return
+        # if self.ball.intersects(self.brick_container.sprites):
+        #     self.ball_brick_intersection()
 
-        index = self.ball_brick_horizontal_collide()
-        if index != -1:
-            # debug += 'horizontal\n'
-            self.ball.reverse_vx()
-            self.player._score += self.brick_container.sprites[index].get_damage_points(
-                self.ball
-            )
-            self.brick_container.sprites[index].repaint_brick()
-            return
+        # index = self.ball_brick_corners_collide()
+        # if index != -1:
+        #     # debug += 'corners\n'
+        #     self.ball.reverse_vx()
+        #     self.player._score += self.brick_container.sprites[index].get_damage_points(
+        #         self.ball
+        #     )
+        #     self.brick_container.sprites[index].repaint_brick()
+        #     return
 
-        index = self.ball_brick_vertical_collide()
-        if index != -1:
-            self.ball.reverse_vy()
-            self.player._score += self.brick_container.sprites[index].get_damage_points(
-                self.ball
-            )
-            self.brick_container.sprites[index].repaint_brick()
-            return
+        # index = self.ball_brick_horizontal_collide()
+        # if index != -1:
+        #     # debug += 'horizontal\n'
+        #     self.ball.reverse_vx()
+        #     self.player._score += self.brick_container.sprites[index].get_damage_points(
+        #         self.ball
+        #     )
+        #     self.brick_container.sprites[index].repaint_brick()
+        #     return
 
-        return
+        # index = self.ball_brick_vertical_collide()
+        # if index != -1:
+        #     self.ball.reverse_vy()
+        #     self.player._score += self.brick_container.sprites[index].get_damage_points(
+        #         self.ball
+        #     )
+        #     self.brick_container.sprites[index].repaint_brick()
+        #     return
+
+        # return
 
     def get_powerup(self, pos):
         type = choice(["expand", "shrink", "fastball", "pgrab", "thruball"])
@@ -362,7 +300,7 @@ class Game:
         self.ball.move_y_to(mid)
 
     def handle_keys(self):
-        global debug
+        logging.info("handle keys")
         if self.kbhit.kbhit():
             key = self.kbhit.getch()
 
@@ -378,7 +316,7 @@ class Game:
             elif key == "a" or key == "d":
                 self.paddle.move(key, self.display.width)
                 if self.ball._dead or (
-                    self.paddle._grab and self.ball._velocity.vx == 0
+                    self.paddle.grab and self.ball._velocity.vx == 0
                 ):
                     self.ball_paddle_centre(self.ball, rel=None)
 
@@ -391,12 +329,11 @@ class Game:
 
             # Start the game
             elif key == " ":
-                if self.ball_paddle_collide():
-                    self.ball_paddle_collide_handle()
-                    self.ball._dead = False
+                logging.debug("space fired")
+                self.collide()
             self.kbhit.flush()
 
-    def reset_game(self, ball):
+    def reset_game(self):
         global debug
         self.remove_items()
         self.display.clrscr()
@@ -499,12 +436,13 @@ class Game:
         return powerups
 
     def ball_collisions_handle(self):
-        self.collide()
-        if self.lost_ball():
-            self.reset_game()
+        if not self.ball._dead:
+            self.collide()
+            if self.lost_ball():
+                self.reset_game()
 
     def mainloop(self):
-        global debug
+        logging.info(self.collision_handler)
         while True:
             time = clock()
             self.handle_keys()
