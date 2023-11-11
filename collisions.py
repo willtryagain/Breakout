@@ -49,7 +49,7 @@ class PaddleCollisionHandler(CollisionHandler):
                     request["ball"].vy = copysign(
                         abs(request["ball"].vy + bias), request["ball"].vy
                     )
-                    logging.debug(request["ball"])
+                    logging.debug(request["ball"].vx)
                 return request
 
         return super().handle(request)

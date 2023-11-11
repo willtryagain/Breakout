@@ -174,8 +174,6 @@ class Game:
         # self.ball.reverse_vx()
 
     def collide(self):
-        logging.debug("collide")
-        logging.debug(self.collision_handler)
         request = {
             "ball": self.ball,
             "display": self.display,
@@ -183,9 +181,10 @@ class Game:
             "brick_container": self.brick_container,
         }
         resp = self.collision_handler.handle(request)
-
-        logging.debug(self.collision_handler)
-        logging.debug(resp)
+        if resp:
+            logging.debug("Collision handler returned: %s", resp)
+            logging.debug(resp["ball"].vx)
+            logging.debug(self.ball.vx)
 
         # if self.ball_side_walls_collide():
         #     self.ball.reverse_vy()
@@ -261,7 +260,7 @@ class Game:
         global debug
         indices = []
         for index, brick in enumerate(self.brick_container.sprites):
-            if brick._strength == 0:
+            if brick.type == "broken":
                 indices.append(index)
                 pos = [brick.x, brick.y]
                 # powerup = self.get_powerup(pos)
@@ -294,13 +293,12 @@ class Game:
 
         if rel:
             y = left_paddle + rel
-            self.ball.move_y_to(y)
+            self.ball.y = y
             return ball
 
-        self.ball.move_y_to(mid)
+        self.ball.y = mid
 
     def handle_keys(self):
-        logging.info("handle keys")
         if self.kbhit.kbhit():
             key = self.kbhit.getch()
 
@@ -329,7 +327,6 @@ class Game:
 
             # Start the game
             elif key == " ":
-                logging.debug("space fired")
                 self.collide()
             self.kbhit.flush()
 
@@ -368,7 +365,7 @@ class Game:
 
         self.display.put(self.paddle)
         for brick in self.brick_container.sprites:
-            if brick._strength:
+            if brick.type != "broken":
                 self.display.put(brick)
 
         for powerup in self._powerups:
@@ -419,10 +416,6 @@ class Game:
             pass
 
     def end_game(self):
-        global debug
-        out = open("debug.txt", "w")
-        out.write(debug)
-        out.close
         sys.exit(0)
 
     def deactivate(self):

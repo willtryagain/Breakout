@@ -34,11 +34,11 @@ class BrickList(SpriteList):
                 brick = self.create_sprite(x0 + (level + level - i) * h, y0 + j * w)
                 self.add(brick)
 
-    def create_sprite(self, x, y, color=None):
-        if color is None:
+    def create_sprite(self, x, y, type=None):
+        if type is None:
             # todo: add inf
-            color = choice([1, 2, 3])
-        return Brick(x, y, color)
+            type = choice(["basic", "mid", "hard", "unbreakable"])
+        return Brick(x, y, type)
 
     def update(self):
         return super().update()

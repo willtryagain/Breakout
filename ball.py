@@ -13,7 +13,7 @@ class Ball(Sprite):
     def __init__(self, screen_height, paddle_y, paddle_width):
         super().__init__(screen_height - 2, (2 * paddle_y + paddle_width) // 2)
         self.reset_ascii()
-        self._dead = True
+        self._dead = True                       
         self._thru = False
         self._fast = False
         self._velocity = Velocity(0, 0)
