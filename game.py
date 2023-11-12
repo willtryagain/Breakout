@@ -183,8 +183,6 @@ class Game:
         resp = self.collision_handler.handle(request)
         if resp:
             logging.debug("Collision handler returned: %s", resp)
-            logging.debug(resp["ball"].vx)
-            logging.debug(self.ball.vx)
 
         # if self.ball_side_walls_collide():
         #     self.ball.reverse_vy()
@@ -299,35 +297,39 @@ class Game:
         self.ball.y = mid
 
     def handle_keys(self):
+        """
+        Handles user input during the game.
+
+        Processes keyboard inputs and performs corresponding actions such as moving the paddle,
+        starting the game, and pausing/unpausing the game.
+
+        Inputs:
+        - self: The instance of the Game class.
+        - key: The keyboard input received from the user.
+
+        Outputs:
+        None
+        """
+
         if self.kbhit.kbhit():
             key = self.kbhit.getch()
 
-            # Pause / Unpause
             if key == "q":
                 self.end_game()
-
-            # Pause / Unpause
-            if key == "p":
+            elif key == "p":
                 self.PAUSED = not self.PAUSED
-
-            # Paddle left / right
             elif key == "a" or key == "d":
                 self.paddle.move(key, self.display.width)
                 if self.ball._dead or (
                     self.paddle.grab and self.ball._velocity.vx == 0
                 ):
                     self.ball_paddle_centre(self.ball, rel=None)
-
-            # Ball left / right
             elif key == "w" or key == "s":
-                if not self.ball._dead:
-                    pass
-                else:
+                if self.ball._dead:
                     self.ball.move(self.display.height, self.display.width, key)
-
-            # Start the game
             elif key == " ":
                 self.collide()
+
             self.kbhit.flush()
 
     def reset_game(self):
@@ -428,24 +430,23 @@ class Game:
             powerups.append(powerup)
         return powerups
 
-    def ball_collisions_handle(self):
-        if not self.ball._dead:
-            self.collide()
-            if self.lost_ball():
-                self.reset_game()
-
     def mainloop(self):
-        logging.info(self.collision_handler)
         while True:
             time = clock()
+
+            if not self.ball._dead:
+                self.collide()
+                if self.lost_ball():
+                    self.reset_game()
+
             self.handle_keys()
             if self.PAUSED:
                 self.wait(time)
                 continue
 
             self.move_items()
+            logging.debug(self.ball)
 
-            self.ball_collisions_handle()
             self.powerup_handle()
             self.remove_items()
             self.display.clrscr()
@@ -453,4 +454,3 @@ class Game:
             self.display.show()
             self.player.display_stats(self.paddle.width, self.ball)
             self.wait(time)
-            # debug += str(self._balls[0]._thru) + "\n"

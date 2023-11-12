@@ -1,5 +1,5 @@
 from typing import Any
-
+import logging
 import numpy as np
 import numpy.typing as npt
 
@@ -57,6 +57,11 @@ class Sprite:
         """
         Moves the sprite by the given x and y coordinates.
         """
+        if x > 0:
+            logging.debug("moving down")
+        elif x < 0:
+            logging.debug("moving up")
+
         self._x += x
         self._y += y
 
@@ -110,5 +115,6 @@ class Sprite:
                 self._x : self._x + self.height, self._y : self._y + self.width
             ] = self._ascii
         except Exception as e:
-            print(e)
-            print(self)
+            logging.debug(e)
+            logging.debug(self)
+            logging.debug(canvas.shape)

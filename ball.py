@@ -18,7 +18,7 @@ class Ball(Sprite):
         self._fast = False
         self._velocity = Velocity(0, 0)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return f"Ball(y={self.y}, x={self.x}, vx={self._velocity.vx}, \
             vy={self._velocity.vy}, dead={self._dead}, thru={self._thru}, \
                 fast={self._fast})"

@@ -30,6 +30,7 @@ class PaddleCollisionHandler(CollisionHandler):
                 <= request["paddle"].y + request["paddle"].width
             ):
                 if request["ball"]._dead:
+                    logging.debug("Paddle dead collision")
                     request["ball"]._dead = False
                     request["ball"].vx = -1
                     if random.randint(0, 1) == 0:
@@ -41,15 +42,14 @@ class PaddleCollisionHandler(CollisionHandler):
                     request["ball"].set_vx(0)
                     request["ball"].set_vy(0)
                 else:
-                    logging.debug("Paddle collision")
+                    logging.debug("Paddle not dead collision")
                     request["ball"].reverse_vx()
                     paddle_mid = request["paddle"].y + request["paddle"].width // 2
                     bias = abs(request["ball"].y - paddle_mid) / request["paddle"].width
-                    bias = int(bias)
                     request["ball"].vy = copysign(
                         abs(request["ball"].vy + bias), request["ball"].vy
                     )
-                    logging.debug(request["ball"].vx)
+                    request["ball"].vy = int(request["ball"].vy)
                 return request
 
         return super().handle(request)
@@ -62,14 +62,16 @@ class BoundaryCollisionHandler(CollisionHandler):
     def handle(self, request: Any) -> None:
         # collide with the top wall
         if request["ball"].x == 0:
+            logging.debug("top wall collision")
             request["ball"].reverse_vx()
             return request
 
         # collide with side walls
         if (
             request["ball"].y == 0
-            or request["ball"].y + request["ball"].width + 1 == request["display"].width
+            or request["ball"].y + request["ball"].width == request["display"].width
         ):
+            logging.debug("side wall collision")
             request["ball"].reverse_vy()
 
         return super().handle(request)

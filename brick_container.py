@@ -16,23 +16,23 @@ class BrickList(SpriteList):
         w = 5
         level = y0 // 8
 
-        for i in range(level):
-            for j in range(-i, i + 1):
-                brick = self.create_sprite(x0 + i * h, y0 + j * w)
-                self.add(brick)
+        # for i in range(level):
+        #     for j in range(-i, i + 1):
+        #         brick = self.create_sprite(x0 + i * h, y0 + j * w)
+        #         self.add(brick)
 
-        for j in range(
-            -level - settings.BRICK_LENGTH, level + settings.BRICK_LENGTH + 1
-        ):
-            if y0 + j * w >= width or y0 + j * w < 0:
-                continue
-            brick = self.create_sprite(x0 + level * h, y0 + j * w)
-            self.add(brick)
+        # for j in range(
+        #     -level - settings.BRICK_LENGTH, level + settings.BRICK_LENGTH + 1
+        # ):
+        #     if y0 + j * w >= width or y0 + j * w < 0:
+        #         continue
+        #     brick = self.create_sprite(x0 + level * h, y0 + j * w)
+        #     self.add(brick)
 
-        for i in range(level - 1, -1, -1):
-            for j in range(-i, i + 1):
-                brick = self.create_sprite(x0 + (level + level - i) * h, y0 + j * w)
-                self.add(brick)
+        # for i in range(level - 1, -1, -1):
+        #     for j in range(-i, i + 1):
+        #         brick = self.create_sprite(x0 + (level + level - i) * h, y0 + j * w)
+        #         self.add(brick)
 
     def create_sprite(self, x, y, type=None):
         if type is None:
